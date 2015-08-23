@@ -7,6 +7,10 @@ compile: src/main.c
 	avr-objcopy -O ihex -R src/.eeprom src/steep_beta.a src/steep_beta.hex
 
 flash: src/steep_beta.a
+ifndef DEVNAME
+	$(warning DEVNAME is not set. Assuming target on /dev/ttyACM0.)
+	$(eval DEVNAME=/dev/ttyACM0)
+endif
 	avrdude -q -q -F -V -c arduino -p ATMEGA328P -P $(DEVNAME) -b 115200 -U flash:w:src/steep_beta.hex
 
 clean:
