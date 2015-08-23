@@ -1,4 +1,5 @@
 all: compile
+flash: compile
 
 compile: src/main.c
 	avr-gcc -O2 -DF_CPU=16000000UL -mmcu=atmega328p -c src/main.c -o src/main.o -Wall -Werror
