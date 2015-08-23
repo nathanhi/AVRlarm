@@ -1,14 +1,15 @@
 #include "uart.h"
-#include <util/delay.h>
+#include "led.h"
 
 int main (void) {
     // Initialize UART, enable transmission
     uart_init();
+    printf("steep_beta v0.1");
+    
+    // Initialize LEDs
+    led_init();
 
-    /* set pin 5 of PORTB for output*/
-    DDRB |= _BV(DDB5);
     int i = 0;
-
     while(1) {
         i++;
         printf("%i\r\n", i);

@@ -1,11 +1,10 @@
 #include "uart.h"
 
-int uart_putchar(char c, FILE *stream) {
+void uart_putchar(char c, FILE *stream) {
     if( c == '\n' )
         uart_putchar( '\r', stream );
     UDR0 = c;
     loop_until_bit_is_set(UCSR0A, TXC0);
-    return 0;
 }
 
 static FILE uart_out = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
