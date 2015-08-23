@@ -1,12 +1,16 @@
 all: compile
-flash: compile
 
-compile: src/main.c
+src/main.o: src/main.c
 	avr-gcc -O2 -mmcu=atmega328p -c src/main.c -o src/main.o -Wall -Werror
-	avr-gcc -mmcu=atmega328p -o src/steep_beta.a src/main.o
+
+src/uart.o: src/uart.c
+	avr-gcc -O2 -mmcu=atmega328p -c src/uart.c -o src/uart.o -Wall -Werror
+
+compile: src/uart.o src/main.o
+	avr-gcc -mmcu=atmega328p -o src/steep_beta.a src/uart.o src/main.o
 	avr-objcopy -O ihex -R src/.eeprom src/steep_beta.a src/steep_beta.hex
 
-flash: src/steep_beta.a
+flash: compile
 ifndef DEVNAME
 	$(warning DEVNAME is not set. Assuming target on /dev/ttyACM0.)
 	$(eval DEVNAME=/dev/ttyACM0)
