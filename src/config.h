@@ -5,7 +5,18 @@
 #define BAUD 9600
 #define BAUDRATE (((F_CPU)/(BAUD*16UL))-1)
 
-// Initial wait until alarm will be armed: 10 Minutes
-#define INITIAL_WAIT 600000
+// Initial wait until alarm will be armed: 1 Minute
+//#define INITIAL_WAIT 60000
+#define INITIAL_WAIT 1000
+
+// GSM specific settings
+// If SIM has no PIN code,
+// simply comment the next line
+#define PINCODE "1234"
+
+// Bool is nice :)
+#define false 0
+#define true 1
+#define bool int
 
 #include <avr/io.h>

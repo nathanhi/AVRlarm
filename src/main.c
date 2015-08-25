@@ -1,13 +1,17 @@
 #include "uart.h"
 #include "led.h"
+#include "gsm.h"
 
 int main (void) {
     // Initialize UART, enable transmission
     uart_init();
-    printf("steep_beta v0.1");
+    printf("steep_beta v0.1\r\n");
     
     // Initialize LEDs
     led_init();
+    
+    // Initialize GSM Modem
+    gsm_init();
 
     int i = 0;
     while(1) {
