@@ -8,7 +8,7 @@ Hardware dependencies
 ---------------------
 
 Steep Beta currently requires a Siemens TC35 GSM modem to
-function correctly. Later plans are to make specific functions
+function properly. Later plans are to make specific functions
 optional.
 
 Building
