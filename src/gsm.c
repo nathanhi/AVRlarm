@@ -9,6 +9,7 @@ int gsm_exec(char *c) {
      * returns return code of modem */
      // TODO: Implement output parsing..
      printf("%s\r\n", c);
+     printf("[GSM]: Got: %s\r\n", uart_getmsg());
      return CODE_OK;
 }
 
