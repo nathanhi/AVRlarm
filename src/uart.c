@@ -13,7 +13,8 @@ void string_append(char **str, char c, int *aritems, int *arsize) {
 
 void uart_putchar(char c, FILE *stream) {
     /* Writes a character to UART,
-     * automatic CRLF completion */
+     * automatic CRLF completion
+     */
     if (c == '\n')
         uart_putchar('\r', stream);
     loop_until_bit_is_set(UCSR0A, UDRE0);
@@ -28,7 +29,8 @@ char uart_getchar() {
 
 char *uart_getmsg() {
     /* Receives complete messages
-     * until CR or LF from UART */
+     * until CR or LF from UART
+     */
     char *msgbuf = NULL;
     char lastchar;
 

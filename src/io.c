@@ -5,7 +5,8 @@ int CURPORT = -1;
 bool io_port_init(int port) {
     /* Initializes a given port and
      * points data registers to correct
-     * port */
+     * port
+     */
     if (port < PORTB0 && port > PORTB5) {
         // Invalid port specified
         return false;
@@ -21,6 +22,9 @@ bool io_port_init(int port) {
 }
 
 bool io_set_port_state(int port, int port_state) {
+    /* Sets desired port state (IO_PORT_HIGH,
+     * IO_PORT_LOW) on given port (PORTB{0-7\})
+     */
     if (CURPORT != port) {
         // Initialize port if necessary
         if (!io_port_init(port)) {
