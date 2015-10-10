@@ -35,6 +35,9 @@ void gsm_init() {
     // English result codes instead of numeric for better readability
     printf("[GSM]: English result codes instead of numeric..\r\n");
     gsm_exec("ATV1");
+#else
+    printf("[GSM]: Numeric result codes instead of english..\r\n");
+    gsm_exec("ATV0");
 #endif
 
     // Enter PIN-Code if defined
