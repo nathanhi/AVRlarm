@@ -17,11 +17,11 @@ int main (void) {
         printf("%i\r\n", i);
         
         /* set pin 5 high to turn led on */
-        port_high(PORT_LED);
+        io_set_port_state(PORT_LED, IO_PORT_HIGH);
         _delay_ms(1000);
 
         /* set pin 5 low to turn led off */
-        port_low(PORT_LED);
+        io_set_port_state(PORT_LED, IO_PORT_LOW);
         _delay_ms(1000);
     }
 }
