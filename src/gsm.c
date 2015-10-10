@@ -3,6 +3,9 @@
 
 #include "gsm.h"
 #include "uart.h"
+#include "io.h"
+
+#include <util/delay.h>
 
 int gsm_exec(char *c) {
     /* Executes given command and
@@ -16,6 +19,13 @@ int gsm_exec(char *c) {
 void gsm_init() {
     /* Initialize Siemens TC35 GSM Unit */
     printf("[GSM]: Initializing GSM modem..\r\n");
+    
+    /* Set ignition to HIGH for a second */
+    printf("[GSM]: Activating hardware..\r\n");
+    io_set_port_state(PORT_GSM_IGN, IO_PORT_HIGH);
+    _delay_ms(1000);
+    io_set_port_state(PORT_GSM_IGN, IO_PORT_LOW);
+    
     printf("[GSM]: Reset modem to factory defaults..\r\n");
     if (gsm_exec("AT&F0") != CODE_OK) {
         printf("[GSM]: Failed to reset modem!\r\n");
