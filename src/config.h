@@ -10,9 +10,9 @@
 #define INITIAL_WAIT 1000
 
 // GSM specific settings
-// If SIM has no PIN code,
-// simply comment the next line
-#define PINCODE "1234"
+// If SIM has PIN code, simply
+// uncomment the next line
+//#define PINCODE "1234"
 
 // IO specific settings
 #define PORT_LED PORTB5
