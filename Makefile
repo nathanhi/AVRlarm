@@ -6,14 +6,14 @@ src/main.o: src/main.c
 src/uart.o: src/uart.c
 	avr-gcc -O2 -mmcu=atmega328p -c src/uart.c -o src/uart.o -Wall -Werror
 
-src/led.o: src/led.c
-	avr-gcc -O2 -mmcu=atmega328p -c src/led.c -o src/led.o -Wall -Werror
-
 src/gsm.o: src/gsm.c
 	avr-gcc -O2 -mmcu=atmega328p -c src/gsm.c -o src/gsm.o -Wall -Werror
 
-compile: src/uart.o src/led.o src/gsm.o src/main.o
-	avr-gcc -mmcu=atmega328p -o src/steep_beta.a src/uart.o src/led.o src/gsm.o src/main.o
+src/io.o: src/io.c
+	avr-gcc -O2 -mmcu=atmega328p -c src/io.c -o src/io.o -Wall -Werror
+
+compile: src/uart.o src/gsm.o src/io.o src/main.o
+	avr-gcc -mmcu=atmega328p -o src/steep_beta.a src/uart.o src/gsm.o src/io.o src/main.o
 	avr-objcopy -O ihex -R src/.eeprom src/steep_beta.a src/steep_beta.hex
 
 flash: compile

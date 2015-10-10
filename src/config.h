@@ -14,6 +14,11 @@
 // simply comment the next line
 #define PINCODE "1234"
 
+// IO specific settings
+#define PORT_LED PORTB5
+#define PORT_GSM_IGN PORTB4
+#define PORT_ALARM_INDICATOR PORTB3
+
 // Bool is nice :)
 #define false 0
 #define true 1

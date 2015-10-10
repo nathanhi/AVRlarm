@@ -1,14 +1,12 @@
 #include "uart.h"
-#include "led.h"
 #include "gsm.h"
+#include "io.h"
+#include <util/delay.h>
 
 int main (void) {
     // Initialize UART, enable transmission
     uart_init();
     printf("steep_beta v0.1\r\n");
-    
-    // Initialize LEDs
-    led_init();
     
     // Initialize GSM Modem
     gsm_init();
@@ -19,11 +17,11 @@ int main (void) {
         printf("%i\r\n", i);
         
         /* set pin 5 high to turn led on */
-        PORTB |= _BV(PORTB5);
+        port_high(PORT_LED);
         _delay_ms(1000);
 
         /* set pin 5 low to turn led off */
-        PORTB &= ~_BV(PORTB5);
+        port_low(PORT_LED);
         _delay_ms(1000);
     }
 }
