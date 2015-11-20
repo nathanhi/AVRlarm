@@ -24,4 +24,12 @@
 #define true 1
 #define bool int
 
+// Enable debugging output?
+//#define DEBUG
+
+// Setting for morse code
+// Dit is 120ms long (10 WpM)
+// Dah is 3x Dit.
+#define morse_dit_length 120
+
 #include <avr/io.h>

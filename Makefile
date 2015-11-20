@@ -12,8 +12,11 @@ src/gsm.o: src/gsm.c
 src/io.o: src/io.c
 	avr-gcc -O2 -mmcu=atmega328p -c src/io.c -o src/io.o -Wall -Werror
 
-compile: src/uart.o src/gsm.o src/io.o src/main.o
-	avr-gcc -mmcu=atmega328p -o src/steep_beta.a src/uart.o src/gsm.o src/io.o src/main.o
+src/morse.o: src/morse.c
+	avr-gcc -std=c99 -O2 -mmcu=atmega328p -c src/morse.c -o src/morse.o -Wall -Werror
+
+compile: src/uart.o src/gsm.o src/io.o src/morse.o src/main.o
+	avr-gcc -mmcu=atmega328p -o src/steep_beta.a src/uart.o src/gsm.o src/io.o src/morse.o src/main.o
 	avr-objcopy -O ihex -R src/.eeprom src/steep_beta.a src/steep_beta.hex
 
 flash: compile
