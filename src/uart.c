@@ -41,17 +41,13 @@ char *uart_getmsg() {
         // Loop to get all chars
         lastchar = uart_getchar();
 
-        // Append current character to message buffer
-        string_append(&msgbuf, lastchar, &aritems, &arsize);
-
-        if (lastchar == '\n') {
-            // Abort loop if LF has been received
-            break;
-        } else if (lastchar == '\r') {
-            // Append LF to received CR
-            string_append(&msgbuf, '\n', &aritems, &arsize);
+        // Abort loop if LF OR CR has been received
+        if (lastchar == '\n' || lastchar == '\r') {
             break;
         }
+        
+        // Append current character to message buffer
+        string_append(&msgbuf, lastchar, &aritems, &arsize);
     }
     // Return null-terminated string
     string_append(&msgbuf, '\0', &aritems, &arsize);
