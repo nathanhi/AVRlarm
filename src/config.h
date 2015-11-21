@@ -14,6 +14,9 @@
 // uncomment the next line
 //#define PINCODE "1234"
 
+// Target number for alarm notifications
+#define TGT_NUM "+491234567890"
+
 // IO specific settings
 #define PORT_LED PORTB5
 #define PORT_GSM_IGN PORTB4

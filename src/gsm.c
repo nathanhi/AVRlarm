@@ -158,5 +158,24 @@ void gsm_powersave(bool sleep) {
 
 void gsm_shutdown() {
     /* Shuts down GSM module */
-    gsm_exec("AT^SMSO");
+    gsm_exec("AT^SMSO", true);
+}
+
+bool gsm_send_sms(char *msg, char *number) {
+    /* Sends an SMS to the given number */
+    // Set modem to text mode
+    if (gsm_exec("AT+CMGF=1", true) != CODE_OK)
+        return false;
+    
+    // Specify phone number
+    printf("AT+CMGS=%s\r\n", number);
+    
+    // Put message in body
+    printf("%s\r\n", msg);
+    
+    // End message with Ctrl+Z
+    if (gsm_exec("\x1A", true) != CODE_OK)
+        return false;
+    
+    return true;
 }
