@@ -3,11 +3,13 @@
 #include "io.h"
 #include <util/delay.h>
 
+#ifdef DEBUG
 void print_info() {
     printf("LED:\t\t%i\n", io_get_port_state(PORT_LED));
     printf("GSM_IGN:\t%i\n", io_get_port_state(PORT_GSM_IGN));
     printf("ALARM:\t\t%i\n\n", io_get_port_state(PORT_ALARM_INDICATOR));
 }
+#endif
 
 int main (void) {
     // Initialize UART, enable transmission
@@ -16,18 +18,33 @@ int main (void) {
     
     // Initialize GSM Modem
     gsm_init();
+    
+    // Send initialization SMS
+    gsm_send_sms("steep_beta has been initialized, status: AOK", TGT_NUM);
 
     while(1) {
-        /* set pin 5 high to turn led on */
-        printf("Turn LED on..\n");
+        // Power on status LED
         io_set_port_state(PORT_LED, IO_PORT_HIGH);
-        print_info();
-        _delay_ms(10000);
 
-        /* set pin 5 low to turn led off */
-        printf("Turn LED off..\n");
-        io_set_port_state(PORT_LED, IO_PORT_LOW);
+#ifdef DEBUG
+        // Print debug output
         print_info();
-        _delay_ms(5000);
+#endif
+
+        // Pull alarm IO port to low
+        io_set_port_state(PORT_ALARM_INDICATOR, IO_PORT_LOW);
+
+        // Check for IO_PORT_HIGH
+        if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_HIGH)
+            gsm_send_sms("ALAAARM!!11", TGT_NUM);
+
+        // Wait first half of scan interval
+        _delay_ms(SCAN_INTERVAL);
+        
+        // Disable LED
+        io_set_port_state(PORT_LED, IO_PORT_LOW);
+        
+        // Wait the other half
+        _delay_ms(SCAN_INTERVAL);
     }
 }
