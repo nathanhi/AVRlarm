@@ -14,11 +14,15 @@ void print_info() {
 int main (void) {
     // Initialize UART, enable transmission
     uart_init();
-    printf("steep_beta v0.1\r\n");
-    
+
     // Initialize GSM Modem
     gsm_init();
-    
+
+#ifdef INITIAL_WAIT
+    // Wait for specified initial wait time
+    _delay_ms(INITIAL_WAIT);
+#endif
+
     // Send initialization SMS
     gsm_send_sms("steep_beta has been initialized, status: AOK", TGT_NUM);
 
