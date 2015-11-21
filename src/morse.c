@@ -28,7 +28,7 @@ void morse_long(int port) {
 
 void morse_letter(int port, char ltr) {
     /* Morses exactly one letter */
-    
+
     // Pull down given port first
     io_set_port_state(port, IO_PORT_LOW);
     
