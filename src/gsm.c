@@ -20,49 +20,52 @@ int _gsm_exec(char *c, char **retmsg) {
     const char *retval = *retmsg;
 
     // Parse output and return corresponding return code
-    if (strcmp(retval, TXT_OK) == 0 || strcmp(retval, (const char*)CODE_OK+'0') == 0)
+    // We have to use magic numbers instead of the defines (CODE_...) here
+    // because casting all these ints to proper strings would 
+    // create too much of an overhead
+    if (strcmp(retval, TXT_OK) == 0 || strcmp(retval, "0") == 0)
         // Match for CODE/TXT OK
         return CODE_OK;
-    else if (strcmp(retval, TXT_CONNECT) == 0 || strcmp(retval, (const char*)CODE_CONNECT+'0') == 0)
+    else if (strcmp(retval, TXT_CONNECT) == 0 || strcmp(retval, "1") == 0)
         // Match for CODE/TXT CONNECT
         return CODE_CONNECT;
-    else if (strcmp(retval, TXT_RING) == 0 || strcmp(retval, (const char*)CODE_RING+'0') == 0)
+    else if (strcmp(retval, TXT_RING) == 0 || strcmp(retval, "2") == 0)
         // Match for CODE/TXT RING
         return CODE_RING;
-    else if (strcmp(retval, TXT_NOCARRIER) == 0 || strcmp(retval, (const char*)CODE_NOCARRIER+'0') == 0)
+    else if (strcmp(retval, TXT_NOCARRIER) == 0 || strcmp(retval, "3") == 0)
         // Match for CODE/TXT NOCARRIER
         return CODE_NOCARRIER;
-    else if (strcmp(retval, TXT_ERROR) == 0 || strcmp(retval, (const char*)CODE_ERROR+'0') == 0)
+    else if (strcmp(retval, TXT_ERROR) == 0 || strcmp(retval, "4") == 0)
         // Match for CODE/TXT ERROR
         return CODE_ERROR;
-    else if (strcmp(retval, TXT_NODIALTONE) == 0 || strcmp(retval, (const char*)CODE_NODIALTONE+'0') == 0)
+    else if (strcmp(retval, TXT_NODIALTONE) == 0 || strcmp(retval, "6") == 0)
         // Match for CODE/TXT NODIALTONE
         return CODE_NODIALTONE;
-    else if (strcmp(retval, TXT_BUSY) == 0 || strcmp(retval, (const char*)CODE_BUSY+'0') == 0)
+    else if (strcmp(retval, TXT_BUSY) == 0 || strcmp(retval, "7") == 0)
         // Match for CODE/TXT BUSY
         return CODE_BUSY;
-    else if (strcmp(retval, TXT_CONNECT2400) == 0 || strcmp(retval, (const char*)CODE_CONNECT2400+'0') == 0)
+    else if (strcmp(retval, TXT_CONNECT2400) == 0 || strcmp(retval, "10") == 0)
         // Match for CODE/TXT CONNECT2400
         return CODE_CONNECT2400;
-    else if (strcmp(retval, TXT_CONNECT2400RLP) == 0 || strcmp(retval, (const char*)CODE_CONNECT2400RLP+'0') == 0)
+    else if (strcmp(retval, TXT_CONNECT2400RLP) == 0 || strcmp(retval, "47") == 0)
         // Match for CODE/TXT CONNECT2400RLP
         return CODE_CONNECT2400RLP;
-    else if (strcmp(retval, TXT_CONNECT4800) == 0 || strcmp(retval, (const char*)CODE_CONNECT4800+'0') == 0)
+    else if (strcmp(retval, TXT_CONNECT4800) == 0 || strcmp(retval, "30") == 0)
         // Match for CODE/TXT CONNECT4800
         return CODE_CONNECT4800;
-    else if (strcmp(retval, TXT_CONNECT4800RLP) == 0 || strcmp(retval, (const char*)CODE_CONNECT4800RLP+'0') == 0)
+    else if (strcmp(retval, TXT_CONNECT4800RLP) == 0 || strcmp(retval, "48") == 0)
         // Match for CODE/TXT CONNECT4800RLP
         return CODE_CONNECT4800RLP;
-    else if (strcmp(retval, TXT_CONNECT9600) == 0 || strcmp(retval, (const char*)CODE_CONNECT9600+'0') == 0)
+    else if (strcmp(retval, TXT_CONNECT9600) == 0 || strcmp(retval, "32") == 0)
         // Match for CODE/TXT CONNECT9600
         return CODE_CONNECT9600;
-    else if (strcmp(retval, TXT_CONNECT9600RLP) == 0 || strcmp(retval, (const char*)CODE_CONNECT9600RLP+'0') == 0)
+    else if (strcmp(retval, TXT_CONNECT9600RLP) == 0 || strcmp(retval, "49") == 0)
         // Match for CODE/TXT CONNECT9600RLP
         return CODE_CONNECT9600RLP;
-    else if (strcmp(retval, TXT_CONNECT14400) == 0 || strcmp(retval, (const char*)CODE_CONNECT14400+'0') == 0)
+    else if (strcmp(retval, TXT_CONNECT14400) == 0 || strcmp(retval, "33") == 0)
         // Match for CODE/TXT CONNECT14400
         return CODE_CONNECT14400;
-    else if (strcmp(retval, TXT_CONNECT14400RLP) == 0 || strcmp(retval, (const char*)CODE_CONNECT14400RLP+'0') == 0)
+    else if (strcmp(retval, TXT_CONNECT14400RLP) == 0 || strcmp(retval, "50") == 0)
         // Match for CODE/TXT CONNECT14400RLP
         return CODE_CONNECT14400RLP;
     else
@@ -123,7 +126,6 @@ void gsm_init() {
     printf("[GSM]: Reset modem to factory defaults..\r\n");
 #endif
     gsm_exec("AT&F0", true);
-    }
 
 #ifdef DEBUG
     // English result codes instead of numeric for better readability
