@@ -24,7 +24,7 @@ int main (void) {
 #endif
 
     // Send initialization SMS
-    gsm_send_sms("steep_beta has been initialized, status: AOK", TGT_NUM);
+    gsm_send_sms(ARMMSG, TGT_NUM);
 
     while(1) {
         // Power on status LED
@@ -40,7 +40,7 @@ int main (void) {
 
         // Check for IO_PORT_HIGH
         if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_HIGH)
-            gsm_send_sms("ALAAARM!!11", TGT_NUM);
+            gsm_send_sms(ALARMMSG, TGT_NUM);
 
         // Wait first half of scan interval
         _delay_ms(SCAN_INTERVAL);

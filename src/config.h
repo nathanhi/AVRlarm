@@ -13,6 +13,16 @@
 //#define INITIAL_WAIT 60000
 #define INITIAL_WAIT 1000
 
+// Initialization message that will be sent as soon as
+// the system is armed. Comment it if no message should
+// be sent.
+#define ARMMSG "Alarm system is fully functional and armed."
+
+
+// Message that will be sent in the case of an alarm
+#define ALARMMSG "Intrusion detected!"
+
+
 // GSM specific settings
 // If SIM has PIN code, simply
 // uncomment the next line
