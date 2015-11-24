@@ -43,10 +43,21 @@ int main (void) {
         // Check for IO_PORT_HIGH
         if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_HIGH) {
             gsm_send_sms(ALARMMSG, TGT_NUM);
+
+#ifdef ALARM_RESUME
+            /* If alarm system is allowed to resume after
+             * an alarm, wait for specified time and continue
+             */
+            _delay_ms(ALARM_RESUME);
+#else
+            // If alarm system has to stay in error state, do so
             while (1) {
-               _delay_ms(SCAN_INTERVAL);
+                io_set_port_state(PORT_LED, IO_PORT_LOW);
+                _delay_ms(100);
+                io_set_port_state(PORT_LED, IO_PORT_HIGH);
+                _delay_ms(100);
             }
-        }
+#endif
 
         // Wait first half of scan interval
         _delay_ms(SCAN_INTERVAL);

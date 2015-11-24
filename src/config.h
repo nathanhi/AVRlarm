@@ -10,8 +10,14 @@
 #define SCAN_INTERVAL 500
 
 // Initial wait until alarm will be armed: 1 Minute
-//#define INITIAL_WAIT 60000
-#define INITIAL_WAIT 1000
+#define INITIAL_WAIT 60000
+// Wait for this amount of milliseconds until
+// sending an alarm message
+#define ALARM_WAIT 30000
+// Time (ms) to wait to resume operation after alarm
+// If commented, alarm system will remain in alarm state
+// forever. Default is 30 minutes.
+#define ALARM_RESUME 1800000
 
 // Initialization message that will be sent as soon as
 // the system is armed. Comment it if no message should
@@ -21,7 +27,6 @@
 
 // Message that will be sent in the case of an alarm
 #define ALARMMSG "Intrusion detected!"
-
 
 // GSM specific settings
 // If SIM has PIN code, simply
