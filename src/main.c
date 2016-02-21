@@ -1,5 +1,3 @@
-#define DEBUG
-
 #include "uart.h"
 #include "gsm.h"
 #include "io.h"
@@ -58,6 +56,7 @@ int main (void) {
                 _delay_ms(100);
             }
 #endif
+    }
 
         // Wait first half of scan interval
         _delay_ms(SCAN_INTERVAL);
