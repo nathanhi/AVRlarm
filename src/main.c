@@ -1,3 +1,5 @@
+#define DEBUG
+
 #include "uart.h"
 #include "gsm.h"
 #include "io.h"
@@ -39,8 +41,12 @@ int main (void) {
         io_set_port_state(PORT_ALARM_INDICATOR, IO_PORT_LOW);
 
         // Check for IO_PORT_HIGH
-        if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_HIGH)
+        if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_HIGH) {
             gsm_send_sms(ALARMMSG, TGT_NUM);
+            while (1) {
+               _delay_ms(SCAN_INTERVAL);
+            }
+        }
 
         // Wait first half of scan interval
         _delay_ms(SCAN_INTERVAL);

@@ -2,7 +2,7 @@ Steep Beta
 ==========
 
 Steep Beta is a currently in-development
-DYI AVR alarm system for 8-Bit Atmel CPUs.
+DIY AVR alarm system for 8-Bit Atmel CPUs (ATmega2560).
 
 Hardware dependencies
 ---------------------
@@ -31,7 +31,7 @@ if avrdude is in PATH:
     $ make flash
 
 This assumes per default that your device is available on
-/dev/ttyACM0. To override the flash target, simply override
+/dev/ttyUSB0. To override the flash target, simply override
 the DEVNAME variable, like so:
 
-    $ DEVNAME=/dev/ttyACM1 make flash
+    $ DEVNAME=/dev/ttyUSB1 make flash
