@@ -38,9 +38,20 @@ int main (void) {
         // Pull alarm IO port to low
         io_set_port_state(PORT_ALARM_INDICATOR, IO_PORT_LOW);
 
-        // Check for IO_PORT_HIGH
-        if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_HIGH) {
+        // Check for IO_PORT_LOW
+        if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_LOW) {
+            // Disable all LEDs to avoid detection
+            io_set_port_state(PORT_LED, IO_PORT_LOW);
+
+            // Wait for configured time
+            _delay_ms(ALARM_WAIT);
+
+            // Send SMS
             gsm_send_sms(ALARMMSG, TGT_NUM);
+            while (1) {
+               _delay_ms(SCAN_INTERVAL);
+            }
+        }
 
 #ifdef ALARM_RESUME
             /* If alarm system is allowed to resume after
@@ -56,7 +67,6 @@ int main (void) {
                 _delay_ms(100);
             }
 #endif
-    }
 
         // Wait first half of scan interval
         _delay_ms(SCAN_INTERVAL);
@@ -68,3 +78,4 @@ int main (void) {
         _delay_ms(SCAN_INTERVAL);
     }
 }
+
