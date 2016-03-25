@@ -11,7 +11,7 @@ bool io_port_init(int port, int port_direction) {
      * points data registers to correct
      * port
      */
-    if (port < PORTB0 && port > PORTB5) {
+    if (port < PORTB0 && port > PORTB7) {
         // Invalid port specified
         return false;
     }

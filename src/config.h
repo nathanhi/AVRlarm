@@ -37,17 +37,14 @@
 #define TGT_NUM "+491234567890"
 
 // IO specific settings
-#define PORT_LED PORTB5
-#define PORT_GSM_IGN PORTB4
-#define PORT_ALARM_INDICATOR PORTB3
+#define PORT_LED PORTB7             // Pin 13
+#define PORT_GSM_IGN PORTB6         // Pin 12
+#define PORT_ALARM_INDICATOR PORTB5 // Pin 11
 
 // Bool is nice :)
 #define false 0
 #define true 1
 #define bool int
-
-// Enable debugging output?
-//#define DEBUG
 
 // Setting for morse code
 // Dit is 120ms long (10 WpM)
