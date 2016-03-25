@@ -11,20 +11,16 @@
 
 // Initial wait until alarm will be armed: 1 Minute
 #define INITIAL_WAIT 60000
-// Wait for this amount of milliseconds until
-// sending an alarm message
-#define ALARM_WAIT 30000
-// Time (ms) to wait to resume operation after alarm
-// If commented, alarm system will remain in alarm state
-// forever. Default is 30 minutes.
-#define ALARM_RESUME 1800000
+// Time to wait until notification is sent: Immediate
+#define ALARM_WAIT 0
+// Time to wait until resuming operation after alarm: 1 Minute
+// Won't resume operation if unset
+#define ALARM_RESUME 60000
 
 // Initialization message that will be sent as soon as
 // the system is armed. Comment it if no message should
 // be sent.
 #define ARMMSG "Alarm system is fully functional and armed."
-
-
 // Message that will be sent in the case of an alarm
 #define ALARMMSG "Intrusion detected!"
 
