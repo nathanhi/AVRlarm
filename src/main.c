@@ -72,13 +72,12 @@ int main (void) {
 #endif
 
         // Wait first half of scan interval
-        _delay_ms(SCAN_INTERVAL);
+        _delay_ms(SCAN_INTERVAL/2);
         
         // Disable LED
         io_set_port_state(PORT_LED, IO_PORT_LOW);
         
         // Wait the other half
-        _delay_ms(SCAN_INTERVAL);
+        _delay_ms(SCAN_INTERVAL/2);
     }
 }
-
