@@ -14,7 +14,7 @@ int _gsm_exec(char *c, char **retmsg) {
 
     // Send message via UART
     char buf[255];
-    snprintf(buf, 255, "%s\r\n", c);
+    snprintf(buf, 255, "%s\n", c);
     uart_sendmsg(GSM_UART, buf);
 
     // Receive answer
@@ -128,8 +128,8 @@ void gsm_init() {
     // Initialize UART
     uart_init(GSM_UART);
 
-    uart_sendmsg(DBG_UART, "[GSM]: Initializing GSM modem..\r\n");
-    uart_sendmsg(DBG_UART, "[GSM]: Activating hardware..\r\n");
+    uart_sendmsg(DBG_UART, "[GSM]: Initializing GSM modem..\n");
+    uart_sendmsg(DBG_UART, "[GSM]: Activating hardware..\n");
 
     /* Set ignition to HIGH for 2.5
      * seconds to activate the modem
@@ -139,12 +139,12 @@ void gsm_init() {
     io_set_port_state(PORT_GSM_IGN, IO_PORT_LOW);
 
     // Reset all modem settings
-    uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\r\n");
+    uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\n");
     gsm_exec("AT&F0", true);
 
 #ifdef DEBUG
     // English result codes instead of numeric for better readability
-    uart_sendmsg(DBG_UART, "[GSM]: English result codes instead of numeric..\r\n");
+    uart_sendmsg(DBG_UART, "[GSM]: English result codes instead of numeric..\n");
     gsm_exec("ATV1", true);
 #else
     // Numeric result codes instead of English..
@@ -153,11 +153,11 @@ void gsm_init() {
 
     // Enter PIN-Code if defined
 #ifdef PINCODE
-    uart_sendmsg(DBG_UART, "[GSM]: Unlocking SIM card..\r\n");
+    uart_sendmsg(DBG_UART, "[GSM]: Unlocking SIM card..\n");
     gsm_exec(strcat("AT+CPIN=", PINCODE), true);
 #endif
 
-    uart_sendmsg(DBG_UART, "[GSM]: Disabling powersave mode..\r\n");
+    uart_sendmsg(DBG_UART, "[GSM]: Disabling powersave mode..\n");
     gsm_powersave(false);
 }
 
@@ -187,11 +187,11 @@ bool gsm_send_sms(char *msg, char *number) {
     uart_sendmsg(DBG_UART, buf);
     
     // Specify phone number
-    snprintf(buf, 255, "AT+CMGS=%s\r\n", number);
+    snprintf(buf, 255, "AT+CMGS=%s\n", number);
     uart_sendmsg(GSM_UART, buf);
     
     // Put message in body
-    snprintf(buf, 255, "%s\r\n", msg);
+    snprintf(buf, 255, "%s\n", msg);
     uart_sendmsg(GSM_UART, buf);
     
     // End message with Ctrl+Z
