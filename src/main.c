@@ -5,15 +5,19 @@
 
 #ifdef DEBUG
 void print_info() {
-    printf("LED:\t\t%i\n", io_get_port_state(PORT_LED));
-    printf("GSM_IGN:\t%i\n", io_get_port_state(PORT_GSM_IGN));
-    printf("ALARM:\t\t%i\n\n", io_get_port_state(PORT_ALARM_INDICATOR));
+    char buf[32];
+    snprintf(buf, 32, "LED:\t\t%i\n", io_get_port_state(PORT_LED));
+    uart_sendmsg(UART0, buf);
+    snprintf(buf, 32, "GSM_IGN:\t%i\n", io_get_port_state(PORT_GSM_IGN));
+    uart_sendmsg(UART0, buf);
+    snprintf(buf, 32, "ALARM:\t\t%i\n\n", io_get_port_state(PORT_ALARM_INDICATOR));
+    uart_sendmsg(UART0, buf);
 }
 #endif
 
 int main (void) {
     // Initialize UART, enable transmission
-    uart_init();
+    uart_init(DBG_UART);
 
     // Initialize GSM Modem
     gsm_init();
@@ -39,7 +43,9 @@ int main (void) {
         io_set_port_state(PORT_ALARM_INDICATOR, IO_PORT_LOW);
 
         // Check for IO_PORT_LOW
+        // LOW == intrusion
         if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_LOW) {
+            uart_sendmsg(DBG_UART, "[ALARM]: Intrusion detected!\n");
             // Disable all LEDs to avoid detection
             io_set_port_state(PORT_LED, IO_PORT_LOW);
 
@@ -48,9 +54,6 @@ int main (void) {
 
             // Send SMS
             gsm_send_sms(ALARMMSG, TGT_NUM);
-            while (1) {
-               _delay_ms(SCAN_INTERVAL);
-            }
         }
 
 #ifdef ALARM_RESUME

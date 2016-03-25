@@ -13,10 +13,12 @@ int _gsm_exec(char *c, char **retmsg) {
      * returns return code of modem */
 
     // Send message via UART
-    printf("%s\r\n", c);
+    char buf[255];
+    snprintf(buf, 255, "%s\r\n", c);
+    uart_sendmsg(GSM_UART, buf);
 
     // Receive answer
-    *retmsg = uart_getmsg();
+    *retmsg = uart_getmsg(GSM_UART);
     const char *retval = *retmsg;
 
     // Parse output and return corresponding return code
@@ -78,10 +80,19 @@ int gsm_exec(char *c, bool abortonerror) {
      * aborts on error if specified
      */
     char *retmsg = NULL;
+#ifdef DEBUG
+    char buf[255];
+    snprintf(buf, 255, "[GSM]: Executing command '%s'...\t", c);
+    uart_sendmsg(DBG_UART, buf);
+#endif
     int retval = _gsm_exec(c, &retmsg);
     if (retval == CODE_ERROR && abortonerror) {
         // If error is received
         char tmp_retval[10];
+#ifdef DEBUG
+        snprintf(buf, 255, "[ERROR]\n%s\n", retmsg);
+        uart_sendmsg(DBG_UART, buf);
+#endif
         itoa(retval, tmp_retval, 10);
         while (true) {
             // Loop endlessly and morse error message
@@ -104,15 +115,21 @@ int gsm_exec(char *c, bool abortonerror) {
             _delay_ms(10*morse_dit_length);
         }
     }
+#ifdef DEBUG
+    else {
+        uart_sendmsg(DBG_UART, "[OK]\n");
+    }
+#endif
     return retval;
 }
 
 void gsm_init() {
     /* Initialize Siemens TC35 GSM Unit */
-#ifdef DEBUG
-    printf("[GSM]: Initializing GSM modem..\r\n");
-    printf("[GSM]: Activating hardware..\r\n");
-#endif
+    // Initialize UART
+    uart_init(GSM_UART);
+
+    uart_sendmsg(DBG_UART, "[GSM]: Initializing GSM modem..\r\n");
+    uart_sendmsg(DBG_UART, "[GSM]: Activating hardware..\r\n");
 
     /* Set ignition to HIGH for 2.5
      * seconds to activate the modem
@@ -122,14 +139,12 @@ void gsm_init() {
     io_set_port_state(PORT_GSM_IGN, IO_PORT_LOW);
 
     // Reset all modem settings
-#ifdef DEBUG
-    printf("[GSM]: Reset modem to factory defaults..\r\n");
-#endif
+    uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\r\n");
     gsm_exec("AT&F0", true);
 
 #ifdef DEBUG
     // English result codes instead of numeric for better readability
-    printf("[GSM]: English result codes instead of numeric..\r\n");
+    uart_sendmsg(DBG_UART, "[GSM]: English result codes instead of numeric..\r\n");
     gsm_exec("ATV1", true);
 #else
     // Numeric result codes instead of English..
@@ -138,13 +153,11 @@ void gsm_init() {
 
     // Enter PIN-Code if defined
 #ifdef PINCODE
-#ifdef DEBUG
-    printf("[GSM]: Unlocking SIM card..\r\n");
-#endif
+    uart_sendmsg(DBG_UART, "[GSM]: Unlocking SIM card..\r\n");
     gsm_exec(strcat("AT+CPIN=", PINCODE), true);
 #endif
 
-    printf("[GSM]: Disabling powersave mode..\r\n");
+    uart_sendmsg(DBG_UART, "[GSM]: Disabling powersave mode..\r\n");
     gsm_powersave(false);
 }
 
@@ -166,14 +179,20 @@ void gsm_shutdown() {
 bool gsm_send_sms(char *msg, char *number) {
     /* Sends an SMS to the given number */
     // Set modem to text mode
+    char buf[255];
     if (gsm_exec("AT+CMGF=1", true) != CODE_OK)
         return false;
+
+    snprintf(buf, 255, "[GSM]: Sending SMS with %i characters to '%s'.\n", strlen(msg), number);
+    uart_sendmsg(DBG_UART, buf);
     
     // Specify phone number
-    printf("AT+CMGS=%s\r\n", number);
+    snprintf(buf, 255, "AT+CMGS=%s\r\n", number);
+    uart_sendmsg(GSM_UART, buf);
     
     // Put message in body
-    printf("%s\r\n", msg);
+    snprintf(buf, 255, "%s\r\n", msg);
+    uart_sendmsg(GSM_UART, buf);
     
     // End message with Ctrl+Z
     if (gsm_exec("\x1A", true) != CODE_OK)

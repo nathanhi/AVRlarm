@@ -402,7 +402,6 @@ void morse_letter(int port, char ltr) {
 void morse(int port, char *msg) {
     /* Morses a series of characters */
     for (int i = 0; i < strlen(msg); i++) {
-        printf("%c", msg[i]);
         morse_letter(port, msg[i]);
     }
     _delay_ms(3*morse_dit_length);
