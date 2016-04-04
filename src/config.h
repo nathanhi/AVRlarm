@@ -1,3 +1,6 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
 // 16MHz + 9600 Baud
 // Possible bit rates:
 // http://bit.ly/1ND0wxf
@@ -48,3 +51,5 @@
 #define morse_dit_length 120
 
 #include <avr/io.h>
+
+#endif /* CONFIG_H */

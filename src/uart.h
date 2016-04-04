@@ -1,3 +1,6 @@
+#ifndef UART_H
+#define UART_H
+
 #include "config.h"
 #include <stdio.h>
 
@@ -13,3 +16,5 @@ void uart_putchar(int uart, char c);
 void uart_sendmsg(int uart, char *msg);
 char *uart_getmsg(int uart);
 void uart_init(int uart);
+
+#endif /* UART_H */

@@ -30,6 +30,8 @@ int main (void) {
     // Send initialization SMS
     gsm_send_sms(ARMMSG, TGT_NUM);
 
+    uart_sendmsg(DBG_UART, "[ALARM]: Beginning alarm loop!\n");
+
     while(1) {
         // Power on status LED
         io_set_port_state(PORT_LED, IO_PORT_HIGH);

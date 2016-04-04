@@ -20,7 +20,7 @@ bool io_port_init(int port, int port_direction) {
         // Current port already initialized in right direction
         return true;
     }
-    
+
     switch(port_direction) {
         // IO port is used for input
         case IO_PORT_IN: DDRB &= ~_BV(port); break;
@@ -29,7 +29,7 @@ bool io_port_init(int port, int port_direction) {
         // Invalid port direction specified
         default: return false;
     }
-    
+
     CURPORT = port;
     CURPORTDIR = port_direction;
     return true;
