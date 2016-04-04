@@ -73,9 +73,11 @@ char *uart_getmsg(int uart) {
     while (true) {
         // Loop to get all chars
         lastchar = uart_getchar(uart);
+        if (lastchar == '\r')
+            continue;
 
-        // Abort loop if LF OR CR has been received
-        if (lastchar == '\n' || lastchar == '\r') {
+        // Abort loop if LF has been received
+        if (lastchar == '\n') {
             break;
         }
         

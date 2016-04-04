@@ -131,12 +131,21 @@ void gsm_init() {
     uart_sendmsg(DBG_UART, "[GSM]: Initializing GSM modem..\n");
     uart_sendmsg(DBG_UART, "[GSM]: Activating hardware..\n");
 
+    // Send escape to abort running tasks
+    uart_sendmsg(GSM_UART, "\27\n");
+
     /* Set ignition to HIGH for 2.5
      * seconds to activate the modem
      */
     io_set_port_state(PORT_GSM_IGN, IO_PORT_HIGH);
     _delay_ms(2500);
     io_set_port_state(PORT_GSM_IGN, IO_PORT_LOW);
+
+    // Send escape to abort running tasks
+    uart_sendmsg(GSM_UART, "\27");
+
+    // Disable echo
+    gsm_exec("ATE0", true);
 
     // Reset all modem settings
     uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\n");

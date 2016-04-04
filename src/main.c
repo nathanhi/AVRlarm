@@ -56,7 +56,6 @@ int main (void) {
 
             // Send SMS
             gsm_send_sms(ALARMMSG, TGT_NUM);
-        }
 
 #ifdef ALARM_RESUME
             /* If alarm system is allowed to resume after
@@ -72,6 +71,7 @@ int main (void) {
                 _delay_ms(100);
             }
 #endif
+        }
 
         // Wait first half of scan interval
         _delay_ms(SCAN_INTERVAL/2);
