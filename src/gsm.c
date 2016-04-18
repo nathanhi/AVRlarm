@@ -17,7 +17,8 @@ int _gsm_exec(char *c, char **retmsg) {
     snprintf(buf, 255, "%s\n", c);
     uart_sendmsg(GSM_UART, buf);
 
-    // Receive answer
+    // Receive answer; discard first answer (just a newline)
+    uart_getmsg(GSM_UART);
     *retmsg = uart_getmsg(GSM_UART);
     const char *retval = *retmsg;
 
@@ -185,27 +186,45 @@ void gsm_shutdown() {
     gsm_exec("AT^SMSO", true);
 }
 
-bool gsm_send_sms(char *msg, char *number) {
+bool _gsm_send_sms(char *msg, char *number) {
     /* Sends an SMS to the given number */
     // Set modem to text mode
-    char buf[255];
+    char buf[1024];
     if (gsm_exec("AT+CMGF=1", true) != CODE_OK)
         return false;
 
-    snprintf(buf, 255, "[GSM]: Sending SMS with %i characters to '%s'.\n", strlen(msg), number);
+    snprintf(buf, 1024, "[GSM]: Sending SMS with %i characters to '%s'.\n", strlen(msg), number);
     uart_sendmsg(DBG_UART, buf);
     
     // Specify phone number
-    snprintf(buf, 255, "AT+CMGS=%s\n", number);
+    snprintf(buf, 1024, "AT+CMGS=%s\n", number);
     uart_sendmsg(GSM_UART, buf);
     
     // Put message in body
-    snprintf(buf, 255, "%s\n", msg);
+    snprintf(buf, 1024, "%s\n", msg);
     uart_sendmsg(GSM_UART, buf);
     
     // End message with Ctrl+Z
-    if (gsm_exec("\x1A", true) != CODE_OK)
+    gsm_exec("\x1A\x1A", false);
+    uart_getmsg(GSM_UART);
+
+    if (gsm_exec("\x1A\n", false) != CODE_OK)
         return false;
     
     return true;
+}
+
+bool gsm_send_sms(char *msg, char *numbers) {
+    bool status = true;
+    char *pt;
+    pt = strtok(numbers, ",");
+    while (pt != NULL) {
+        // Send SMS to every number specified
+        if (!_gsm_send_sms(msg, pt)) {
+            // If send failed, fail overall status
+            status = false;
+        }
+        pt = strtok (NULL, ",");
+    }
+    return status;
 }

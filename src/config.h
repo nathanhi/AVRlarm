@@ -33,7 +33,8 @@
 //#define PINCODE "1234"
 
 // Target number for alarm notifications
-#define TGT_NUM "+491234567890"
+// Multiple numbers can be specified comma separated
+#define TGT_NUMS "+491,+4912,+49123,+491234,+4912345,+49123456,+491234567,+4912345678"
 
 // IO specific settings
 #define PORT_LED PORTB7             // Pin 13

@@ -28,7 +28,7 @@ int main (void) {
 #endif
 
     // Send initialization SMS
-    gsm_send_sms(ARMMSG, TGT_NUM);
+    gsm_send_sms(ARMMSG, TGT_NUMS);
 
     uart_sendmsg(DBG_UART, "[ALARM]: Beginning alarm loop!\n");
 
@@ -55,7 +55,7 @@ int main (void) {
             _delay_ms(ALARM_WAIT);
 
             // Send SMS
-            gsm_send_sms(ALARMMSG, TGT_NUM);
+            gsm_send_sms(ALARMMSG, TGT_NUMS);
 
 #ifdef ALARM_RESUME
             /* If alarm system is allowed to resume after
