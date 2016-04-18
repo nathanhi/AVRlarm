@@ -28,7 +28,7 @@ int main (void) {
 #endif
 
     // Send initialization SMS
-    gsm_send_sms(ARMMSG, TGT_NUMS);
+    gsm_send_sms(ARMMSG, INFO_NUMS);
 
     uart_sendmsg(DBG_UART, "[ALARM]: Beginning alarm loop!\n");
 

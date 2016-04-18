@@ -36,6 +36,10 @@
 // Multiple numbers can be specified comma separated
 #define TGT_NUMS "+491,+4912,+49123,+491234,+4912345,+49123456,+491234567,+4912345678"
 
+// Target number for informal notifications
+// Multiple numbers can be specified comma separated
+#define INFO_NUMS "+491,+4912,+49123"
+
 // IO specific settings
 #define PORT_LED PORTB7             // Pin 13
 #define PORT_GSM_IGN PORTB6         // Pin 12
