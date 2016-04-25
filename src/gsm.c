@@ -91,7 +91,7 @@ int gsm_exec(char *c, bool abortonerror) {
         // If error is received
         char tmp_retval[10];
 #ifdef DEBUG
-        snprintf(buf, 255, "[ERROR]\n%s\n", retmsg);
+        snprintf(buf, 255, "[%s]\n", retmsg);
         uart_sendmsg(DBG_UART, buf);
 #endif
         itoa(retval, tmp_retval, 10);
@@ -189,7 +189,7 @@ void gsm_shutdown() {
 bool _gsm_send_sms(char *msg, char *number) {
     /* Sends an SMS to the given number */
     // Set modem to text mode
-    char buf[1024];
+    char buf[1024] = { '\0' };
     if (gsm_exec("AT+CMGF=1", true) != CODE_OK)
         return false;
 
@@ -201,15 +201,15 @@ bool _gsm_send_sms(char *msg, char *number) {
     uart_sendmsg(GSM_UART, buf);
     
     // Put message in body
-    snprintf(buf, 1024, "%s\n", msg);
+    snprintf(buf, 1024, "%s", msg);
     uart_sendmsg(GSM_UART, buf);
-    
-    // End message with Ctrl+Z
-    gsm_exec("\x1A\x1A", false);
-    uart_getmsg(GSM_UART);
+    // Receive '>'
+    //uart_sendmsg(DBG_UART, uart_getmsg(GSM_UART));
+    uart_sendmsg(GSM_UART, "\x1A");
+    uart_sendmsg(DBG_UART, uart_getmsg(GSM_UART));
 
-    if (gsm_exec("\x1A\n", false) != CODE_OK)
-        return false;
+    //if (gsm_exec("\x1A", true) != CODE_OK)
+    //    return false;
     
     return true;
 }
