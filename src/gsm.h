@@ -3,6 +3,7 @@
 
 #include "config.h"
 
+#define CODE_ALREADYSET -1
 #define CODE_OK 0
 #define CODE_CONNECT 1
 #define CODE_RING 2

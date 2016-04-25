@@ -72,6 +72,9 @@ int _gsm_exec(char *c, char **retmsg) {
         // Match for CODE/TXT CONNECT14400RLP
         return CODE_CONNECT14400RLP;
     else
+        if ((strcmp(retval, c)) == 0) {
+            return CODE_ALREADYSET;
+        }
         // Return CODE_ERROR if output cannot be parsed
         return CODE_ERROR;
 }
@@ -190,23 +193,27 @@ bool _gsm_send_sms(char *msg, char *number) {
     /* Sends an SMS to the given number */
     // Set modem to text mode
     char buf[1024] = { '\0' };
-    if (gsm_exec("AT+CMGF=1", true) != CODE_OK)
+    int txtmode = gsm_exec("AT+CMGF=1", true);
+    if (!((txtmode == CODE_OK) || (txtmode == CODE_ALREADYSET)))
         return false;
 
     snprintf(buf, 1024, "[GSM]: Sending SMS with %i characters to '%s'.\n", strlen(msg), number);
     uart_sendmsg(DBG_UART, buf);
     
-    // Specify phone number
+    // Specify phone number & empty UART buffer
     snprintf(buf, 1024, "AT+CMGS=%s\n", number);
     uart_sendmsg(GSM_UART, buf);
-    
+    uart_getmsg(GSM_UART);
+
     // Put message in body
+    memset(&buf[0], '\0', 1024);
     snprintf(buf, 1024, "%s", msg);
     uart_sendmsg(GSM_UART, buf);
-    // Receive '>'
-    //uart_sendmsg(DBG_UART, uart_getmsg(GSM_UART));
+
+    // Receive '> ...' and message ID
     uart_sendmsg(GSM_UART, "\x1A");
-    uart_sendmsg(DBG_UART, uart_getmsg(GSM_UART));
+    uart_getmsg(GSM_UART);
+    uart_getmsg(GSM_UART);
 
     //if (gsm_exec("\x1A", true) != CODE_OK)
     //    return false;
