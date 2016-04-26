@@ -3,13 +3,17 @@
 #include "io.h"
 #include <util/delay.h>
 
+#include <string.h> // memset
+
 #ifdef DEBUG
 void print_info() {
-    char buf[32];
+    char buf[32] = { '\0' };
     snprintf(buf, 32, "LED:\t\t%i\n", io_get_port_state(PORT_LED));
     uart_sendmsg(UART0, buf);
+    memset(&buf[0], '\0', 32);
     snprintf(buf, 32, "GSM_IGN:\t%i\n", io_get_port_state(PORT_GSM_IGN));
     uart_sendmsg(UART0, buf);
+    memset(&buf[0], '\0', 32);
     snprintf(buf, 32, "ALARM:\t\t%i\n\n", io_get_port_state(PORT_ALARM_INDICATOR));
     uart_sendmsg(UART0, buf);
 }

@@ -14,9 +14,12 @@ int _gsm_exec(char *c, char **retmsg) {
 
      // Clean UART receive buffer first
      uart_clearbuf(GSM_UART);
+     uart_clearbuf(GSM_UART);
+     uart_clearbuf(GSM_UART);
+     uart_clearbuf(GSM_UART);
 
     // Send message via UART
-    char buf[255];
+    char buf[255] = { '\0' };
     snprintf(buf, 255, "%s\n", c);
     uart_sendmsg(GSM_UART, buf);
 
@@ -88,7 +91,7 @@ int gsm_exec(char *c, bool abortonerror) {
      */
     char *retmsg = NULL;
 #ifdef DEBUG
-    char buf[255];
+    char buf[255] = { '\0' };
     snprintf(buf, 255, "[GSM]: Executing command '%s'...\t", c);
     uart_sendmsg(DBG_UART, buf);
 #endif
@@ -97,6 +100,7 @@ int gsm_exec(char *c, bool abortonerror) {
         // If error is received
         char tmp_retval[10];
 #ifdef DEBUG
+        memset(&buf[0], '\0', 255);
         snprintf(buf, 255, "[%s]\n", retmsg);
         uart_sendmsg(DBG_UART, buf);
 #endif
@@ -156,7 +160,7 @@ void gsm_init() {
 
     // Reset all modem settings
     uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\n");
-    gsm_exec("AT&F0", true);
+    gsm_exec("AT&F", true);
 
 #ifdef DEBUG
     // English result codes instead of numeric for better readability
