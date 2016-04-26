@@ -12,6 +12,9 @@ int _gsm_exec(char *c, char **retmsg) {
     /* Executes given command and
      * returns return code of modem */
 
+     // Clean UART receive buffer first
+     uart_clearbuf(GSM_UART);
+
     // Send message via UART
     char buf[255];
     snprintf(buf, 255, "%s\n", c);
@@ -136,7 +139,7 @@ void gsm_init() {
     uart_sendmsg(DBG_UART, "[GSM]: Activating hardware..\n");
 
     // Send escape to abort running tasks
-    uart_sendmsg(GSM_UART, "\27\n");
+    uart_sendmsg(GSM_UART, "\27");
 
     /* Set ignition to HIGH for 2.5
      * seconds to activate the modem
@@ -201,6 +204,7 @@ bool _gsm_send_sms(char *msg, char *number) {
     uart_sendmsg(DBG_UART, buf);
     
     // Specify phone number & empty UART buffer
+    memset(&buf[0], '\0', 1024);
     snprintf(buf, 1024, "AT+CMGS=%s\n", number);
     uart_sendmsg(GSM_UART, buf);
     uart_getmsg(GSM_UART);
@@ -210,10 +214,15 @@ bool _gsm_send_sms(char *msg, char *number) {
     snprintf(buf, 1024, "%s", msg);
     uart_sendmsg(GSM_UART, buf);
 
-    // Receive '> ...' and message ID
-    uart_sendmsg(GSM_UART, "\x1A");
-    uart_getmsg(GSM_UART);
-    uart_getmsg(GSM_UART);
+    // Send message
+    uart_putchar(GSM_UART, '\x1A');
+
+    // Discard verbose output of modem
+    uart_getmsg(GSM_UART);  // '> ...'
+    uart_getmsg(GSM_UART);  // Message ID or return code
+
+    // Clear buffer
+    uart_clearbuf(GSM_UART);
 
     //if (gsm_exec("\x1A", true) != CODE_OK)
     //    return false;

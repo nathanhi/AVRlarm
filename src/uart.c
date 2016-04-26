@@ -54,6 +54,11 @@ void uart_sendmsg(int uart, char *msg) {
     }
 }
 
+void uart_clearbuf(int uart) {
+    // Clears receive buffer of given UART
+    *(uart_regs[uart].UDR);
+}
+
 char uart_getchar(int uart) {
     /* Receives one character from UART */
     loop_until_bit_is_set(*(uart_regs[uart].UCSRA), uart_regs[uart].RXC);
@@ -73,6 +78,7 @@ char *uart_getmsg(int uart) {
     while (true) {
         // Loop to get all chars
         lastchar = uart_getchar(uart);
+
         if (lastchar == '\r')
             continue;
 
@@ -84,6 +90,9 @@ char *uart_getmsg(int uart) {
         // Append current character to message buffer
         string_append(&msgbuf, lastchar, &aritems, &arsize);
     }
+    // Clear UART message buffer afterwards (ignore everything after \n)
+    uart_clearbuf(uart);
+
     // Return null-terminated string
     string_append(&msgbuf, '\0', &aritems, &arsize);
     return msgbuf;

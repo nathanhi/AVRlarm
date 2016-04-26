@@ -16,5 +16,6 @@ void uart_putchar(int uart, char c);
 void uart_sendmsg(int uart, char *msg);
 char *uart_getmsg(int uart);
 void uart_init(int uart);
+void uart_clearbuf(int uart);
 
 #endif /* UART_H */
