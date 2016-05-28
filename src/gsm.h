@@ -3,7 +3,6 @@
 
 #include "config.h"
 
-#define CODE_ALREADYSET -1
 #define CODE_OK 0
 #define CODE_CONNECT 1
 #define CODE_RING 2
@@ -39,6 +38,6 @@
 void gsm_init();
 void gsm_powersave(bool);
 int gsm_exec(char*, bool);
-bool gsm_send_sms(char *msg, char *number);
+void gsm_send_sms(char *msg, char *number);
 
 #endif /* GSM_H */

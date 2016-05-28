@@ -79,17 +79,20 @@ char *uart_getmsg(int uart) {
         // Loop to get all chars
         lastchar = uart_getchar(uart);
 
-        if (lastchar == '\r')
+        // The modem clears its output with \r
+        if (lastchar == '\r') {
+            uart_clearbuf(uart);
             continue;
+        }
 
         // Abort loop if LF has been received
-        if (lastchar == '\n') {
+        if (lastchar == '\n')
             break;
-        }
         
         // Append current character to message buffer
         string_append(&msgbuf, lastchar, &aritems, &arsize);
     }
+
     // Clear UART message buffer afterwards (ignore everything after \n)
     uart_clearbuf(uart);
 
