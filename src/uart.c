@@ -44,6 +44,7 @@ void uart_putchar(int uart, char c) {
      */
     if (c == '\n')
         uart_putchar(uart, '\r');
+
     loop_until_bit_is_set(*(uart_regs[uart].UCSRA), uart_regs[uart].UDRE);
     *(uart_regs[uart].UDR) = c;
 }

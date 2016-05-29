@@ -160,6 +160,10 @@ void gsm_init() {
     // English result codes instead of numeric for better readability
     uart_sendmsg(DBG_UART, "[GSM]: English result codes instead of numeric..\n");
     gsm_exec("ATV1", true);
+
+    // Enable extended error reporting
+    uart_sendmsg(DBG_UART, "[GSM]: Enable extended error codes...\n");
+    gsm_exec("AT+CMEE=2", true);
 #else
     // Numeric result codes instead of English..
     gsm_exec("ATV0", true);
@@ -173,6 +177,10 @@ void gsm_init() {
 
     uart_sendmsg(DBG_UART, "[GSM]: Disabling powersave mode..\n");
     gsm_powersave(false);
+
+    uart_sendmsg(DBG_UART, "[GSM]: Setting default character " \
+                           "set to GSM..\n");
+    gsm_exec("AT+CSCS=\"GSM\"", true);
 }
 
 void gsm_powersave(bool sleep) {
