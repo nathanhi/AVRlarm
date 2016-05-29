@@ -62,8 +62,13 @@ void uart_clearbuf(int uart) {
 
 char uart_getchar(int uart) {
     /* Receives one character from UART */
-    loop_until_bit_is_set(*(uart_regs[uart].UCSRA), uart_regs[uart].RXC);
-    return *(uart_regs[uart].UDR);
+    char tmp;
+    tmp = 0;
+    if (*(uart_regs[uart].UCSRA) & (1<<uart_regs[uart].RXC)) {
+        tmp = *(uart_regs[uart].UDR);
+        while (!(*(uart_regs[uart].UCSRA) & (1<<uart_regs[uart].UDRE)));
+    }
+    return tmp;
 }
 
 char *uart_getmsg(int uart) {
@@ -79,6 +84,10 @@ char *uart_getmsg(int uart) {
     while (true) {
         // Loop to get all chars
         lastchar = uart_getchar(uart);
+
+        // Continue until buffer is filled
+        if (lastchar == 0)
+            continue;
 
         // The modem clears its output with \r
         if (lastchar == '\r') {
