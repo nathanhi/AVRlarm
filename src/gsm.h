@@ -37,7 +37,7 @@
 
 void gsm_init();
 void gsm_powersave(bool);
-int gsm_exec(char*, bool);
+int gsm_exec(char*, bool, bool);
 void gsm_send_sms(char *msg, char *number);
 
 #endif /* GSM_H */

@@ -8,7 +8,7 @@
 
 #include <util/delay.h>
 
-int _gsm_exec(char *c, char **retmsg) {
+int _gsm_exec(char *c, char **retmsg, bool autoeol) {
     /* Executes given command and
      * returns return code of modem */
 
@@ -17,7 +17,12 @@ int _gsm_exec(char *c, char **retmsg) {
 
     // Send message via UART
     char buf[255] = { '\0' };
-    snprintf(buf, 255, "%s\r\n", c);
+    if (autoeol)
+        snprintf(buf, 255, "%s\r", c);
+    else
+        snprintf(buf, 255, "%s", c);
+
+    // Send command
     uart_sendmsg(GSM_UART, buf);
 
     // Receive until correct data is retrieved
@@ -79,7 +84,7 @@ int _gsm_exec(char *c, char **retmsg) {
     }
 }
 
-int gsm_exec(char *c, bool abortonerror) {
+int gsm_exec(char *c, bool abortonerror, bool autoeol) {
     /* Executes given GSM commands and
      * aborts on error if specified
      */
@@ -89,7 +94,7 @@ int gsm_exec(char *c, bool abortonerror) {
     snprintf(buf, 255, "[GSM]: Executing command '%s'...\t", c);
     uart_sendmsg(DBG_UART, buf);
 #endif
-    int retval = _gsm_exec(c, &retmsg);
+    int retval = _gsm_exec(c, &retmsg, autoeol);
 #ifdef DEBUG
     memset(&buf[0], '\0', 255);
     snprintf(buf, 255, "[%s]\r\n", retmsg);
@@ -154,25 +159,25 @@ void gsm_init() {
 
     // Reset all modem settings
     uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\n");
-    gsm_exec("AT&F", true);
+    gsm_exec("AT&F", true, true);
 
 #ifdef DEBUG
     // English result codes instead of numeric for better readability
     uart_sendmsg(DBG_UART, "[GSM]: English result codes instead of numeric..\n");
-    gsm_exec("ATV1", true);
+    gsm_exec("ATV1", true, true);
 
     // Enable extended error reporting
     uart_sendmsg(DBG_UART, "[GSM]: Enable extended error codes...\n");
-    gsm_exec("AT+CMEE=2", true);
+    gsm_exec("AT+CMEE=2", true, true);
 #else
     // Numeric result codes instead of English..
-    gsm_exec("ATV0", true);
+    gsm_exec("ATV0", true, true);
 #endif
 
     // Enter PIN-Code if defined
 #ifdef PINCODE
     uart_sendmsg(DBG_UART, "[GSM]: Unlocking SIM card..\n");
-    gsm_exec(strcat("AT+CPIN=", PINCODE), true);
+    gsm_exec(strcat("AT+CPIN=", PINCODE), true, true);
 #endif
 
     uart_sendmsg(DBG_UART, "[GSM]: Disabling powersave mode..\n");
@@ -180,7 +185,7 @@ void gsm_init() {
 
     uart_sendmsg(DBG_UART, "[GSM]: Setting default character " \
                            "set to GSM..\n");
-    gsm_exec("AT+CSCS=\"GSM\"", true);
+    gsm_exec("AT+CSCS=\"GSM\"", true, true);
 }
 
 void gsm_powersave(bool sleep) {
@@ -190,39 +195,40 @@ void gsm_powersave(bool sleep) {
      */
     char sleepstate[21];
     itoa(!sleep, sleepstate, 10);
-    gsm_exec(strcat("AT+CFUN=", sleepstate), true);
+    gsm_exec(strcat("AT+CFUN=", sleepstate), true, true);
 }
 
 void gsm_shutdown() {
     /* Shuts down GSM module */
-    gsm_exec("AT^SMSO", true);
+    gsm_exec("AT^SMSO", true, true);
 }
 
 void _gsm_send_sms(char *msg, char *number) {
     /* Sends an SMS to the given number */
     // Set modem to text mode
     char buf[1024] = { '\0' };
-    gsm_exec("AT+CMGF=1", true);
+    gsm_exec("AT+CMGF=1", true, true);
 
     snprintf(buf, 1024, "[GSM]: Sending SMS with %i characters to '%s'.\n", strlen(msg), number);
     uart_sendmsg(DBG_UART, buf);
-    
-    // Specify phone number & empty UART buffer
-    memset(&buf[0], '\0', 512);
-    snprintf(buf, 512, "AT+CMGS=\"%s\"\r", number);
+
+    // Switch to text mode for given number
+    memset(&buf, '\0', 1024);
+    snprintf(buf, 1024, "AT+CMGS=\"%s\"\r", number);
     uart_sendmsg(GSM_UART, buf);
     uart_clearbuf(GSM_UART);
 
-    // Put message in body
-    memset(&buf[0], '\0', 1024);
-    snprintf(buf, 1024, "%s\26", msg);
-    uart_sendmsg(GSM_UART, msg);
-
-    // Clear buffer
+    // Write message to buffer
+    memset(&buf, '\0', 1024);
+    snprintf(buf, 1024, "%s", msg);
+    uart_sendmsg(GSM_UART, buf);
     uart_clearbuf(GSM_UART);
 
-    //gsm_exec("\x1A", true);
-    //gsm_exec("\26", true);
+    // Send SMS
+    gsm_exec("\26", true, true);  // Ctrl-Z
+
+    // Clear buffer, just to make sure
+    uart_clearbuf(GSM_UART);
 }
 
 void gsm_send_sms(char *msg, char *numbers) {
