@@ -1,8 +1,7 @@
 #include "uart.h"
 #include "gsm.h"
 #include "io.h"
-#include <util/delay.h> //delay_ms
-
+#include <util/delay.h> // delay_ms
 #include <string.h> // memset
 
 #ifdef DEBUG
