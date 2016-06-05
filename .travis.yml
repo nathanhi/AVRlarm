@@ -1,3 +1,7 @@
+env:
+  global:
+   - secure: "ScvUeO66feALeCJ+OFZzTtdVooTTb0Z/vhDLAMTnN6QpBLKz1kyZH+W+TaXcw1kNnK2y0qYoeQ3tNjeOUR1VrQW1/g7jDleqsNa0NaU+xbHAt2BcIHFKRzcIYlDwVPAFxF1f86iu2A5tlhoADMDaZwLbey4HoFeXtphLpYC1SfmBMKsHdEpiZRi8TS2LLtW1OsHk9NNGWCus30zKaDIDSHb3HBoQzPigDYUfn4uzMHDu8gh2IAlLo8aiheNJe924iJpgxggY9Aomg964LEOwfvhTkhcGL3KufJ5GFgzayB70zM563EaqHBS290ogq+Pvs7/96GHNqxaODoV2X1hVhIYEmGpXbHn0REnqxz4FVS4Kiw0cW6TPoCJfEMDXr/Boo1+R6DUIa9Pq05dpODSSTj5utpF3ykMPN3HJ6k5+IIibTp9JFEPlbbPencnmRs50JeOkMCbdTIQvMxI2zbfYFXedDFtd2HBsLHvvDSWuhLGaUeqqDDvvUzhNAyGlw1SDNJ+uCAGGsEy8WuD1bq/Z1UeLrF0msY5KpBwNMUwa/Cz2iDsHobHzZQ3CUq1TywjofKHk2bWFkS0g7cBHGNKkxTBrA4AY5feH3z+hnR76WW3yZcnHaNbSFPSP2iFs1HTuxVpJiD/yw0DAUUnm1efSzZqHzHaO0Bkr7/ePnsvrons="
+
 language: c
 
 before_install:
@@ -7,3 +11,13 @@ install:
   - sudo apt-get install -qq gcc-avr binutils-avr avr-libc
 
 script: make clean all
+
+addons:
+  coverity_scan:
+    project:
+      name: "nathanhi/steep-beta"
+      description: "Build submitted via Travis CI"
+    notification_email: nathanhi@deepserve.info
+    build_command_prepend: "make clean"
+    build_command:   "make"
+    branch_pattern: master
