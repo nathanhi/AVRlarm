@@ -1,11 +1,10 @@
-#include <stdlib.h>
-#include <string.h>
-
 #include "gsm.h"
 #include "uart.h"
 #include "io.h"
 #include "morse.h"
 
+#include <stdlib.h>
+#include <string.h>
 #include <util/delay.h>
 
 int _gsm_exec(char *c, char **retmsg, bool autoeol) {

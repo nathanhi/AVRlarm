@@ -1,6 +1,7 @@
 #include "uart.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct uart_registers {
     volatile uint8_t *UBRRL; /* Bit rate lower register (8-Bit) */

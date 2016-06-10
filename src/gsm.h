@@ -2,6 +2,7 @@
 #define GSM_H
 
 #include "config.h"
+#include <stdbool.h>
 
 #define CODE_OK 0
 #define CODE_CONNECT 1

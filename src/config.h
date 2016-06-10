@@ -47,11 +47,6 @@
 #define PORT_GSM_IGN PORTB6         // Pin 12
 #define PORT_ALARM_INDICATOR PORTB5 // Pin 11
 
-// Bool is nice :)
-#define false 0
-#define true 1
-#define bool int
-
 // Setting for morse code
 // Dit is 120ms long (10 WpM)
 // Dah is 3x Dit.

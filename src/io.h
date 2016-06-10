@@ -2,6 +2,7 @@
 #define IO_H
 
 #include "config.h"
+#include <stdbool.h>
 
 #define IO_PORT_HIGH 1
 #define IO_PORT_LOW 0
