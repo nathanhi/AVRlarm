@@ -192,9 +192,9 @@ void gsm_powersave(bool sleep) {
      * If sleep is true, powersave mode is set
      * If sleep is false, powersave mode is unset
      */
-    char sleepstate[21];
-    itoa(!sleep, sleepstate, 10);
-    gsm_exec(strcat("AT+CFUN=", sleepstate), true, true);
+    char sleepcmd[10] = { '\0' };
+    snprintf(sleepcmd, 10, "AT+CFUN=%i", !sleep);
+    gsm_exec(sleepcmd, true, true);
 }
 
 void gsm_shutdown() {
