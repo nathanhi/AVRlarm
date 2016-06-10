@@ -1,8 +1,9 @@
 Steep Beta
 ==========
 
-[![Build Status](https://travis-ci.org/nathanhi/steep-beta.svg?branch=master)](https://travis-ci.org/nathanhi/steep-beta)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/9073/badge.svg)](https://scan.coverity.com/projects/nathanhi-steep-beta)
+[![Build Status](https://img.shields.io/travis/nathanhi/steep-beta.svg?maxAge=2592000&style=flat-square&branch=master)](https://travis-ci.org/nathanhi/steep-beta)
+[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/9073.svg?maxAge=2592000&style=flat-square)](https://scan.coverity.com/projects/nathanhi-steep-beta)
+[![MIT License](https://img.shields.io/github/license/nathanhi/steep-beta.svg?maxAge=2592000&style=flat-square)](https://github.com/nathanhi/steep-beta/blob/HEAD/LICENSE)
 
 Steep Beta is a currently in-development
 DIY AVR alarm system for 8-Bit Atmel CPUs (ATmega2560).
