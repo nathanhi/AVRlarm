@@ -124,6 +124,7 @@ int gsm_exec(char *c, bool abortonerror, bool autoeol) {
             _delay_ms(10*morse_dit_length);
         }
     }
+    free(retmsg);
     return retval;
 }
 
