@@ -19,8 +19,11 @@ src/io.o: src/io.c
 src/morse.o: src/morse.c
 	avr-gcc -std=c99 -mmcu=atmega2560 -c src/morse.c -o src/morse.o $(CFLAGS)
 
-compile: src/uart.o src/gsm.o src/io.o src/morse.o src/main.o
-	avr-gcc -mmcu=atmega2560 -o src/steep_beta.a src/uart.o src/gsm.o src/io.o src/morse.o src/main.o
+src/timer.o: src/timer.c
+	avr-gcc -std=c99 -mmcu=atmega2560 -c src/timer.c -o src/timer.o $(CFLAGS)
+
+compile: src/uart.o src/gsm.o src/io.o src/morse.o src/timer.o src/main.o
+	avr-gcc -Wl,-u,vfprintf -lprintf_flt -lm -mmcu=atmega2560 -o src/steep_beta.a src/uart.o src/gsm.o src/io.o src/morse.o src/timer.o src/main.o
 	avr-objcopy -O ihex -R src/.eeprom src/steep_beta.a src/steep_beta.hex
 
 flash: compile

@@ -1,4 +1,6 @@
 #include "uart.h"
+#include "timer.h"
+#include <float.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -51,6 +53,16 @@ void uart_putchar(int uart, char c) {
 }
 
 void uart_sendmsg(int uart, char *msg) {
+    if (uart == DBG_UART) {
+        // Print timestamp first on DBG_UART
+        char buf[255] = { '\0' };
+        double uptime = (double)timer_get_uptime()/(double)1000.00;
+        snprintf(buf, 255, "[%lf] ", uptime);
+        for (int i = 0; i < strlen(buf); i++) {
+            uart_putchar(uart, buf[i]);
+        }
+    }
+
     for (int i = 0; i < strlen(msg); i++) {
         uart_putchar(uart, msg[i]);
     }

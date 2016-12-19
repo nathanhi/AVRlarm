@@ -1,6 +1,7 @@
 #include "uart.h"
 #include "gsm.h"
 #include "io.h"
+#include "timer.h"
 #include <util/delay.h> // delay_ms
 #include <string.h> // memset
 
@@ -19,6 +20,9 @@ void print_info() {
 #endif
 
 int main (void) {
+    // Initialise uptime timer
+    timer_init();
+
     // Initialize UART, enable transmission
     uart_init(DBG_UART);
 
