@@ -52,7 +52,12 @@ void uart_putchar(int uart, char c) {
     *(uart_regs[uart].UDR) = c;
 }
 
-void uart_sendmsg(int uart, char *msg) {
+void uart_sendmsg(int uart, char *msg, int len) {
+    if (len == -1) {
+        // Try to get length using strlen if no length was specified
+        len = strlen(msg);
+    }
+
     if (uart == DBG_UART) {
         // Print timestamp first on DBG_UART
         char buf[255] = { '\0' };
@@ -63,7 +68,12 @@ void uart_sendmsg(int uart, char *msg) {
         }
     }
 
-    for (int i = 0; i < strlen(msg); i++) {
+    for (int i = 0; i < len; i++) {
+        if (msg[i] == '\0') {
+            // Break on null byte
+            break;
+        }
+
         uart_putchar(uart, msg[i]);
     }
 }
