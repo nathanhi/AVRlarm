@@ -24,8 +24,11 @@ src/morse.o: src/morse.c
 src/timer.o: src/timer.c
 	$(CC) -std=c99 -mmcu=atmega2560 -c src/timer.c -o src/timer.o $(CFLAGS)
 
-compile: src/uart.o src/gsm.o src/io.o src/morse.o src/timer.o src/main.o
-	$(CC) -Wl,-u,vfprintf -lprintf_flt -lm -mmcu=atmega2560 -o src/steep_beta.a src/uart.o src/gsm.o src/io.o src/morse.o src/timer.o src/main.o
+src/ringbuf.o: src/ringbuf.c
+	$(CC) -mmcu=atmega2560 -c src/ringbuf.c -o src/ringbuf.o $(CFLAGS)
+
+compile: src/uart.o src/gsm.o src/io.o src/morse.o src/timer.o src/ringbuf.o src/main.o
+	$(CC) -Wl,-u,vfprintf -lprintf_flt -lm -mmcu=atmega2560 -o src/steep_beta.a src/uart.o src/gsm.o src/io.o src/morse.o src/timer.o src/ringbuf.o src/main.o
 	$(OBJCOPY) -O ihex -R src/.eeprom src/steep_beta.a src/steep_beta.hex
 
 flash: compile
