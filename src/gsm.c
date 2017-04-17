@@ -128,6 +128,19 @@ int gsm_exec(char *c, bool abortonerror, bool autoeol) {
     return retval;
 }
 
+void gsm_toggle_igt() {
+    /* Set ignition to LOW for 100ms
+     * and HIGH for 1000ms to activate the modem
+     * as described in
+     * "3.3.1.1 Turn on GSM engine using the ignition line IGT (Power on)"
+     */
+    io_set_port_state(PORT_GSM_IGN, IO_PORT_LOW);
+    _delay_ms(100);  // From the manual, pull down for 100ms
+    io_set_port_state(PORT_GSM_IGN, IO_PORT_HIGH);
+    _delay_ms(100);  // From the manual, pull and pull up for 1000ms
+    io_set_port_state(PORT_GSM_IGN, IO_PORT_LOW);
+}
+
 void gsm_init() {
     /* Initialize Siemens TC35 GSM Unit */
     // Wait until modem firmware has finished booting
@@ -144,34 +157,23 @@ void gsm_init() {
     uart_putchar(GSM_UART, '\24'); // Ctrl-X
     uart_putchar(GSM_UART, '\27'); // Escape
 
-    /* Set ignition to HIGH for 2.5
-     * seconds to activate the modem
-     */
-    io_set_port_state(PORT_GSM_IGN, IO_PORT_HIGH);
-    _delay_ms(2500);
-    io_set_port_state(PORT_GSM_IGN, IO_PORT_LOW);
-    _delay_ms(2500);
+    // Send short pulse to GSM modem
+    gsm_toggle_igt();
 
-    // Disable echo
-    uart_sendmsg(GSM_UART, "ATE0\r\n");
-    uart_clearbuf(GSM_UART);
-    uart_clearbuf(GSM_UART);
+    // Enable echo
+    gsm_exec("ATE1", true, true);
 
     // Reset all modem settings
     uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\n", -1);
     gsm_exec("AT&F", true, true);
 
-#ifdef DEBUG
-    // English result codes instead of numeric for better readability
-    uart_sendmsg(DBG_UART, "[GSM]: English result codes instead of numeric..\n");
+    // Enhanced return message format (<CR><LF>message<CR><LF>)
     gsm_exec("ATV1", true, true);
 
+#ifdef DEBUG
     // Enable extended error reporting
     uart_sendmsg(DBG_UART, "[GSM]: Enable extended error codes...\n", -1);
     gsm_exec("AT+CMEE=2", true, true);
-#else
-    // Numeric result codes instead of English..
-    gsm_exec("ATV0", true, true);
 #endif
 
     // Enter PIN-Code if defined
@@ -180,27 +182,9 @@ void gsm_init() {
     gsm_exec(strcat("AT+CPIN=", PINCODE), false, true);
 #endif
 
-    uart_sendmsg(DBG_UART, "[GSM]: Disabling powersave mode..\n");
-    gsm_powersave(false);
-
     uart_sendmsg(DBG_UART, "[GSM]: Setting default character " \
                            "set to GSM..\n", -1);
     gsm_exec("AT+CSCS=\"GSM\"", true, true);
-}
-
-void gsm_powersave(bool sleep) {
-    /* Toggles powersave mode.
-     * If sleep is true, powersave mode is set
-     * If sleep is false, powersave mode is unset
-     */
-    char sleepcmd[10] = { '\0' };
-    snprintf(sleepcmd, 10, "AT+CFUN=%i", !sleep);
-    gsm_exec(sleepcmd, true, true);
-}
-
-void gsm_shutdown() {
-    /* Shuts down GSM module */
-    gsm_exec("AT^SMSO", true, true);
 }
 
 void _gsm_send_sms(char *msg, char *number) {
