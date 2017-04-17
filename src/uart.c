@@ -104,7 +104,7 @@ char *uart_getmsg(int uart) {
      * until CR or LF from given UART
      */
     char *msgbuf = NULL;
-    char c = NULL;
+    char c = '\0';
 
     int aritems = 0;
     int arsize = 0;

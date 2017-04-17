@@ -17,6 +17,12 @@ void print_info() {
     snprintf(buf, 32, "ALARM:\t\t%i\n\n", io_get_port_state(PORT_ALARM_INDICATOR));
     uart_sendmsg(UART0, buf, 32);
 }
+
+int freeMem() {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
 #endif
 
 int main (void) {
@@ -25,6 +31,12 @@ int main (void) {
 
     // Initialize UART, enable transmission
     uart_init(DBG_UART);
+
+#ifdef DEBUG
+    char buf[64] = { '\0' };
+    snprintf(buf, 64, "SRAM free memory:\t\t%ib\n", freeMem());
+    uart_sendmsg(DBG_UART, buf, 64);
+#endif
 
     // Initialize GSM Modem
     gsm_init();
