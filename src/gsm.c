@@ -17,7 +17,7 @@ int _gsm_exec(char *c, char **retmsg, bool autoeol) {
     // Send message via UART
     char buf[255] = { '\0' };
     if (autoeol)
-        snprintf(buf, 255, "%s\r", c);
+        snprintf(buf, 255, "%s\n", c);
     else
         snprintf(buf, 255, "%s", c);
 
@@ -96,7 +96,7 @@ int gsm_exec(char *c, bool abortonerror, bool autoeol) {
     int retval = _gsm_exec(c, &retmsg, autoeol);
 #ifdef DEBUG
     memset(&buf[0], '\0', 255);
-    snprintf(buf, 255, "[%s]\r\n", retmsg);
+    snprintf(buf, 255, "[%s]\n", retmsg);
     uart_sendmsg(DBG_UART, buf, 255);
 #endif
     if (retval == CODE_ERROR && abortonerror) {
@@ -214,7 +214,7 @@ void _gsm_send_sms(char *msg, char *number) {
 
     // Switch to text mode for given number
     memset(&buf, '\0', 1024);
-    snprintf(buf, 1024, "AT+CMGS=\"%s\"\r\n", number);
+    snprintf(buf, 1024, "AT+CMGS=\"%s\"\n", number);
     uart_sendmsg(GSM_UART, buf, 1024);
     uart_clearbuf(GSM_UART);
 
