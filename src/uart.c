@@ -162,9 +162,9 @@ void uart_buffer_rx(int uart) {
 
 #ifdef DEBUG
     char buf[128] = { '\0' };
-    snprintf(buf, 128, "=============\nrpos: %lu\nwpos:%lu\nchar:%c\n", uart_rxbuf[uart].rpos, uart_rxbuf[uart].wpos, foo);
+    snprintf(buf, 128, "=============\r\nrpos: %lu\r\nwpos:%lu\r\nchar:%c\r\n", uart_rxbuf[uart].rpos, uart_rxbuf[uart].wpos, foo);
     uart_sendmsg(DBG_UART, buf, 128);
-    uart_sendmsg(DBG_UART, "=============\n", -1);
+    uart_sendmsg(DBG_UART, "=============\r\n", -1);
 #endif
 }
 
@@ -209,7 +209,7 @@ void uart_init(int uart) {
 
 #ifdef DEBUG
     char buf[64] = { '\0' };
-    snprintf(buf, 64, "uart_rxbuf[%i] memory address:\t%p\n", uart, &uart_rxbuf[uart]);
+    snprintf(buf, 64, "uart_rxbuf[%i] memory address:\t%p\r\n", uart, &uart_rxbuf[uart]);
     uart_sendmsg(DBG_UART, buf, 64);
 #endif
 

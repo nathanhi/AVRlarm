@@ -17,7 +17,7 @@ int _gsm_exec(char *c, char **retmsg, bool autoeol) {
     // Send message via UART
     char buf[255] = { '\0' };
     if (autoeol)
-        snprintf(buf, 255, "%s\n", c);
+        snprintf(buf, 255, "%s\r\n", c);
     else
         snprintf(buf, 255, "%s", c);
 
@@ -96,7 +96,7 @@ int gsm_exec(char *c, bool abortonerror, bool autoeol) {
     int retval = _gsm_exec(c, &retmsg, autoeol);
 #ifdef DEBUG
     memset(&buf[0], '\0', 255);
-    snprintf(buf, 255, "[%s]\n", retmsg);
+    snprintf(buf, 255, "[%s]\r\n", retmsg);
     uart_sendmsg(DBG_UART, buf, 255);
 #endif
     if (retval == CODE_ERROR && abortonerror) {
@@ -149,8 +149,8 @@ void gsm_init() {
     // Initialize UART
     uart_init(GSM_UART);
 
-    uart_sendmsg(DBG_UART, "[GSM]: Initializing GSM modem..\n", -1);
-    uart_sendmsg(DBG_UART, "[GSM]: Activating hardware..\n", -1);
+    uart_sendmsg(DBG_UART, "[GSM]: Initializing GSM modem..\r\n", -1);
+    uart_sendmsg(DBG_UART, "[GSM]: Activating hardware..\r\n", -1);
 
     // Send escape to abort running tasks
     uart_putchar(GSM_UART, '\3');  // Ctrl-C
@@ -164,7 +164,7 @@ void gsm_init() {
     gsm_exec("ATE1", true, true);
 
     // Reset all modem settings
-    uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\n", -1);
+    uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\r\n", -1);
     gsm_exec("AT&F", true, true);
 
     // Enhanced return message format (<CR><LF>message<CR><LF>)
@@ -172,18 +172,18 @@ void gsm_init() {
 
 #ifdef DEBUG
     // Enable extended error reporting
-    uart_sendmsg(DBG_UART, "[GSM]: Enable extended error codes...\n", -1);
+    uart_sendmsg(DBG_UART, "[GSM]: Enable extended error codes...\r\n", -1);
     gsm_exec("AT+CMEE=2", true, true);
 #endif
 
     // Enter PIN-Code if defined
 #ifdef PINCODE
-    uart_sendmsg(DBG_UART, "[GSM]: Unlocking SIM card..\n", -1);
+    uart_sendmsg(DBG_UART, "[GSM]: Unlocking SIM card..\r\n", -1);
     gsm_exec(strcat("AT+CPIN=", PINCODE), false, true);
 #endif
 
     uart_sendmsg(DBG_UART, "[GSM]: Setting default character " \
-                           "set to GSM..\n", -1);
+                           "set to GSM..\r\n", -1);
     gsm_exec("AT+CSCS=\"GSM\"", true, true);
 }
 
@@ -193,12 +193,12 @@ void _gsm_send_sms(char *msg, char *number) {
     char buf[1024] = { '\0' };
     gsm_exec("AT+CMGF=1", true, true);
 
-    snprintf(buf, 1024, "[GSM]: Sending SMS with %i characters to '%s'.\n", strlen(msg), number);
+    snprintf(buf, 1024, "[GSM]: Sending SMS with %i characters to '%s'.\r\n", strlen(msg), number);
     uart_sendmsg(DBG_UART, buf, 1024);
 
     // Switch to text mode for given number
     memset(&buf, '\0', 1024);
-    snprintf(buf, 1024, "AT+CMGS=\"%s\"\n", number);
+    snprintf(buf, 1024, "AT+CMGS=\"%s\"\r\n", number);
     uart_sendmsg(GSM_UART, buf, 1024);
     uart_clearbuf(GSM_UART);
 
