@@ -109,12 +109,12 @@ char *uart_getmsg(int uart) {
     int aritems = 0;
     int arsize = 0;
 
-    while (!ringbuf_has_new_data(uart_rxbuf[uart])) {
+    while (!ringbuf_has_new_data(&uart_rxbuf[uart])) {
         // Wait for 1/4 the time of the buffer to fill
         _delay_ms(((BAUD/1000)*RINGBUF_MAX_SIZE)/4);
     }
 
-    while (ringbuf_has_new_data(uart_rxbuf[uart])) {
+    while (ringbuf_has_new_data(&uart_rxbuf[uart])) {
         // Get data from ring buffer
         c = ringbuf_read_char(&uart_rxbuf[uart]);
         uart_putchar(DBG_UART, c);

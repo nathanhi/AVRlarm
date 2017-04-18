@@ -11,14 +11,14 @@ void ringbuf_add_char(ringbuffer *buf, char c) {
     buf->wpos++;
 }
 
-bool ringbuf_has_new_data(ringbuffer buf) {
+bool ringbuf_has_new_data(ringbuffer *buf) {
     // Check if the buffer contains new data
-    return (buf.rpos < buf.wpos);
+    return (buf->rpos < buf->wpos);
 }
 
 char ringbuf_read_char(ringbuffer *buf) {
     // Read next available character from the buffer
-    if (!ringbuf_has_new_data(*(buf))) {
+    if (!ringbuf_has_new_data(buf)) {
         // Empty buffer; nothing new
         return '\0';
     }

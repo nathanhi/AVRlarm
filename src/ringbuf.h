@@ -10,6 +10,6 @@ typedef struct {
 } ringbuffer;
 
 void ringbuf_add_char(ringbuffer*, char);
-bool ringbuf_has_new_data(ringbuffer);
+bool ringbuf_has_new_data(ringbuffer*);
 char ringbuf_read_char(ringbuffer*);
 void ringbuf_init(ringbuffer*);
