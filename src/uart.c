@@ -117,7 +117,6 @@ char *uart_getmsg(int uart) {
     while (ringbuf_has_new_data(&uart_rxbuf[uart])) {
         // Get data from ring buffer
         c = ringbuf_read_char(&uart_rxbuf[uart]);
-        uart_putchar(DBG_UART, c);
 
         // Ignore CRs
         if (c == '\r') {
