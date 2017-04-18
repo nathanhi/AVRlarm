@@ -133,17 +133,17 @@ char *uart_getmsg(int uart) {
         string_append(&msgbuf, c, &aritems, &arsize);
     }
 
-#ifdef DEBUG
-        // Print parsed message to DBG_UART in DEBUG mode
-        if (uart == GSM_UART) {
-            char buf[64] = { '\0' };
-            snprintf(buf, 64, "Received '%s' via UART '%i'\n", msgbuf, uart);
-            uart_sendmsg(DBG_UART, buf, 64);
-        }
-#endif
-
     // Return null-terminated string
     string_append(&msgbuf, '\0', &aritems, &arsize);
+
+#ifdef DEBUG
+    // Print parsed message to DBG_UART in DEBUG mode
+    if (uart == GSM_UART) {
+        char buf[64] = { '\0' };
+        snprintf(buf, 64, "Received '%s' via UART '%i'\r\n", msgbuf, uart);
+        uart_sendmsg(DBG_UART, buf, 64);
+    }
+#endif
     return msgbuf;
 }
 
