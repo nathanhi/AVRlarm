@@ -1,42 +1,43 @@
 CC = avr-gcc
 OBJCOPY = avr-objcopy
-CFLAGS += -O2 -Wall -Werror
+CFLAGS += -std=c99 -O2 -Wall -Werror
 
-all: compile
-debug: CFLAGS += -DDEBUG -g
+BUILD_DEPS = src/uart.o \
+             src/gsm.o \
+             src/io.o \
+             src/morse.o \
+             src/timer.o \
+             src/ringbuf.o \
+             src/main.o
+
+ifeq ($(filter debug,$(MAKECMDGOALS)),debug)
+CFLAGS += -DDEBUG -g
+
+# Add 'd' to .o files in case of debug build
+DEBUGEXT = d
+BUILD_DEPS := $(subst .o,$(DEBUGEXT).o,$(BUILD_DEPS))
+endif
+
+all: src/steep_beta.hex
 debug: all
 
-src/main.o: src/main.c
-	$(CC) -mmcu=atmega2560 -c src/main.c -o src/main.o $(CFLAGS)
+src/%$(DEBUGEXT).o: src/%.c
+	$(CC) -mmcu=atmega2560 $(CFLAGS) -c $< -o $@
 
-src/uart.o: src/uart.c
-	$(CC) -std=c99 -mmcu=atmega2560 -c src/uart.c -o src/uart.o $(CFLAGS)
+src/steep_beta.a: $(BUILD_DEPS)
+	$(CC) -Wall -Werror -Wl,-u,vfprintf -lprintf_flt -lm -mmcu=atmega2560 -o $@ $^
 
-src/gsm.o: src/gsm.c
-	$(CC) -mmcu=atmega2560 -c src/gsm.c -o src/gsm.o $(CFLAGS)
+src/steep_beta.hex: src/steep_beta.a
+	$(OBJCOPY) -O ihex -R .eeprom $< $@
 
-src/io.o: src/io.c
-	$(CC) -mmcu=atmega2560 -c src/io.c -o src/io.o $(CFLAGS)
-
-src/morse.o: src/morse.c
-	$(CC) -std=c99 -mmcu=atmega2560 -c src/morse.c -o src/morse.o $(CFLAGS)
-
-src/timer.o: src/timer.c
-	$(CC) -std=c99 -mmcu=atmega2560 -c src/timer.c -o src/timer.o $(CFLAGS)
-
-src/ringbuf.o: src/ringbuf.c
-	$(CC) -mmcu=atmega2560 -c src/ringbuf.c -o src/ringbuf.o $(CFLAGS)
-
-compile: src/uart.o src/gsm.o src/io.o src/morse.o src/timer.o src/ringbuf.o src/main.o
-	$(CC) -Wl,-u,vfprintf -lprintf_flt -lm -mmcu=atmega2560 -o src/steep_beta.a src/uart.o src/gsm.o src/io.o src/morse.o src/timer.o src/ringbuf.o src/main.o
-	$(OBJCOPY) -O ihex -R src/.eeprom src/steep_beta.a src/steep_beta.hex
-
-flash: compile
+.PHONY: flash
+flash: src/steep_beta.hex
 ifndef DEVNAME
 	$(warning DEVNAME is not set. Assuming target on /dev/ttyUSB0.)
 	$(eval DEVNAME=/dev/ttyUSB0)
 endif
-	avrdude -q -q -F -V -patmega2560 -cwiring -P$(DEVNAME) -b115200 -D -Uflash:w:src/steep_beta.hex
+	avrdude -q -q -F -V -patmega2560 -cwiring -P$(DEVNAME) -b115200 -D -Uflash:w:$<
 
+.PHONY: clean
 clean:
-	rm -rf src/*.a src/.eeprom src/*.hex src/*.o
+	rm -rf src/*.a src/*.hex src/*.o
