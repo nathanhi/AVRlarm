@@ -18,7 +18,7 @@ DEBUGEXT = d
 BUILD_DEPS := $(subst .o,$(DEBUGEXT).o,$(BUILD_DEPS))
 endif
 
-all: src/steep_beta.hex
+all: src/steep_beta$(DEBUGEXT).hex
 debug: all
 
 .INTERMEDIATE: src/version.h
@@ -30,14 +30,14 @@ src/version.h:
 src/%$(DEBUGEXT).o: src/%.c src/version.h
 	$(CC) -mmcu=atmega2560 $(CFLAGS) -c $< -o $@
 
-src/steep_beta.a: $(BUILD_DEPS)
+src/steep_beta$(DEBUGEXT).a: $(BUILD_DEPS)
 	$(CC) -Wall -Werror -Wl,-u,vfprintf -lprintf_flt -lm -mmcu=atmega2560 -o $@ $^
 
-src/steep_beta.hex: src/steep_beta.a
+src/steep_beta$(DEBUGEXT).hex: src/steep_beta$(DEBUGEXT).a
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
 
 .PHONY: flash
-flash: src/steep_beta.hex
+flash: src/steep_beta$(DEBUGEXT).hex
 ifndef DEVNAME
 	$(warning DEVNAME is not set. Assuming target on /dev/ttyUSB0.)
 	$(eval DEVNAME=/dev/ttyUSB0)
@@ -46,4 +46,4 @@ endif
 
 .PHONY: clean
 clean:
-	rm -rf src/*.a src/*.hex src/*.o
+	rm -rf src/*.a src/*.hex src/*.o src/version.h
