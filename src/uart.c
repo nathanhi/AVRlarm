@@ -208,7 +208,7 @@ void uart_init(int uart) {
 
 #ifdef DEBUG
     char buf[64] = { '\0' };
-    snprintf(buf, 64, "uart_rxbuf[%i] memory address:\t%p\r\n", uart, &uart_rxbuf[uart]);
+    snprintf(buf, 64, "uart_rxbuf[%i] addr:\t%p\r\n", uart, &uart_rxbuf[uart]);
     uart_sendmsg(DBG_UART, buf, 64);
 #endif
 

@@ -1,3 +1,4 @@
+#include "version.h"
 #include "uart.h"
 #include "gsm.h"
 #include "io.h"
@@ -8,13 +9,13 @@
 #ifdef DEBUG
 void print_info() {
     char buf[32] = { '\0' };
-    snprintf(buf, 32, "LED:\t\t%i\r\n", io_get_port_state(PORT_LED));
+    snprintf(buf, 32, "LED:\t\t\t%i\r\n", io_get_port_state(PORT_LED));
     uart_sendmsg(UART0, buf, 32);
     memset(&buf[0], '\0', 32);
-    snprintf(buf, 32, "GSM_IGN:\t%i\r\n", io_get_port_state(PORT_GSM_IGN));
+    snprintf(buf, 32, "GSM_IGN:\t\t%i\r\n", io_get_port_state(PORT_GSM_IGN));
     uart_sendmsg(UART0, buf, 32);
     memset(&buf[0], '\0', 32);
-    snprintf(buf, 32, "ALARM:\t\t%i\r\n\r\n", io_get_port_state(PORT_ALARM_INDICATOR));
+    snprintf(buf, 32, "ALARM:\t\t%i\r\n", io_get_port_state(PORT_ALARM_INDICATOR));
     uart_sendmsg(UART0, buf, 32);
 }
 
@@ -33,10 +34,15 @@ int main (void) {
     // Initialize UART, enable transmission
     uart_init(DBG_UART);
 
+    uart_sendmsg(DBG_UART, "steep beta v" STEEP_BETA_VERSION " (" STEEP_BETA_COMMIT "; " STEEP_BETA_BUILDDATE ")\r\n\r\n", -1);
+
 #ifdef DEBUG
     char buf[64] = { '\0' };
-    snprintf(buf, 64, "SRAM free memory:\t\t%ib\r\n", freeMem());
+    snprintf(buf, 64, "SRAM free memory:\t%i bytes\r\n", freeMem());
     uart_sendmsg(DBG_UART, buf, 64);
+    print_info();
+    uart_putchar(DBG_UART, '\r');
+    uart_putchar(DBG_UART, '\n');
 #endif
 
     // Initialize GSM Modem
@@ -48,6 +54,7 @@ int main (void) {
 #endif
 
     // Send initialization SMS
+    uart_sendmsg(DBG_UART, "Sending initialisation SMS..\r\n", -1);
     gsm_send_sms(ARMMSG, INFO_NUMS);
 
     uart_sendmsg(DBG_UART, "[ALARM]: Beginning alarm loop!\r\n", -1);

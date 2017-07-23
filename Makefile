@@ -21,7 +21,13 @@ endif
 all: src/steep_beta.hex
 debug: all
 
-src/%$(DEBUGEXT).o: src/%.c
+.INTERMEDIATE: src/version.h
+src/version.h:
+	echo "#define STEEP_BETA_COMMIT \"$(shell git rev-parse --short HEAD || echo unknown commit)\"" > $@
+	echo "#define STEEP_BETA_VERSION \"0.1\"" >> $@
+	echo "#define STEEP_BETA_BUILDDATE \"$(shell date -I || echo unknown build date)\"" >> $@
+
+src/%$(DEBUGEXT).o: src/%.c src/version.h
 	$(CC) -mmcu=atmega2560 $(CFLAGS) -c $< -o $@
 
 src/steep_beta.a: $(BUILD_DEPS)
