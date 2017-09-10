@@ -128,6 +128,12 @@ char *uart_getmsg(int uart) {
             break;
         }
 
+#ifdef DEBUG
+        char buf[64] = { '\0' };
+        snprintf(buf, 64, "[DBG] Received character: '%c' (%i) via UART '%i'\r\n", c, c, uart);
+        uart_sendmsg(DBG_UART, buf, 64);
+#endif
+
         // Append current character to message buffer
         string_append(&msgbuf, c, &aritems, &arsize);
     }
@@ -138,9 +144,9 @@ char *uart_getmsg(int uart) {
 #ifdef DEBUG
     // Print parsed message to DBG_UART in DEBUG mode
     if (uart == GSM_UART) {
-        char buf[64] = { '\0' };
-        snprintf(buf, 64, "Received '%s' via UART '%i'\r\n", msgbuf, uart);
-        uart_sendmsg(DBG_UART, buf, 64);
+        char buf[256] = { '\0' };
+        snprintf(buf, 256, "[DBG] Received string: '%s' via UART '%i'\r\n", msgbuf, uart);
+        uart_sendmsg(DBG_UART, buf, 256);
     }
 #endif
     return msgbuf;
@@ -208,7 +214,7 @@ void uart_init(int uart) {
 
 #ifdef DEBUG
     char buf[64] = { '\0' };
-    snprintf(buf, 64, "uart_rxbuf[%i] addr:\t%p\r\n", uart, &uart_rxbuf[uart]);
+    snprintf(buf, 64, "[DBG] uart_rxbuf[%i] addr:\t%p\r\n", uart, &uart_rxbuf[uart]);
     uart_sendmsg(DBG_UART, buf, 64);
 #endif
 

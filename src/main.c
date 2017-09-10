@@ -9,13 +9,13 @@
 #ifdef DEBUG
 void print_info() {
     char buf[32] = { '\0' };
-    snprintf(buf, 32, "LED:\t\t\t%i\r\n", io_get_port_state(PORT_LED));
+    snprintf(buf, 32, "[DBG] LED:\t\t\t%i\r\n", io_get_port_state(PORT_LED));
     uart_sendmsg(UART0, buf, 32);
     memset(&buf[0], '\0', 32);
-    snprintf(buf, 32, "GSM_IGN:\t\t%i\r\n", io_get_port_state(PORT_GSM_IGN));
+    snprintf(buf, 32, "[DBG] GSM_IGN:\t\t%i\r\n", io_get_port_state(PORT_GSM_IGN));
     uart_sendmsg(UART0, buf, 32);
     memset(&buf[0], '\0', 32);
-    snprintf(buf, 32, "ALARM:\t\t%i\r\n", io_get_port_state(PORT_ALARM_INDICATOR));
+    snprintf(buf, 32, "[DBG] ALARM:\t\t\t%i\r\n", io_get_port_state(PORT_ALARM_INDICATOR));
     uart_sendmsg(UART0, buf, 32);
 }
 
@@ -38,7 +38,7 @@ int main (void) {
 
 #ifdef DEBUG
     char buf[64] = { '\0' };
-    snprintf(buf, 64, "SRAM free memory:\t%i bytes\r\n", freeMem());
+    snprintf(buf, 64, "[DBG] SRAM free memory:\t%i bytes\r\n", freeMem());
     uart_sendmsg(DBG_UART, buf, 64);
     print_info();
     uart_putchar(DBG_UART, '\r');
@@ -57,7 +57,7 @@ int main (void) {
     uart_sendmsg(DBG_UART, "Sending initialisation SMS..\r\n", -1);
     gsm_send_sms(ARMMSG, INFO_NUMS);
 
-    uart_sendmsg(DBG_UART, "[ALARM]: Beginning alarm loop!\r\n", -1);
+    uart_sendmsg(DBG_UART, "[ALARM] Beginning alarm loop!\r\n", -1);
 
     while(1) {
         // Power on status LED
@@ -74,7 +74,7 @@ int main (void) {
         // Check for IO_PORT_LOW
         // LOW == intrusion
         if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_LOW) {
-            uart_sendmsg(DBG_UART, "[ALARM]: Intrusion detected!\r\n", -1);
+            uart_sendmsg(DBG_UART, "[ALARM] Intrusion detected!\r\n", -1);
             // Disable all LEDs to avoid detection
             io_set_port_state(PORT_LED, IO_PORT_LOW);
 

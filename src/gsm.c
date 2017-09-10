@@ -97,10 +97,11 @@ int gsm_exec(char *c, bool abortonerror, bool autoeol) {
     char *retmsg = NULL;
 #ifdef DEBUG
     char buf[255] = { '\0' };
-    snprintf(buf, 255, "[GSM]: Executing command '%s'...\t", c);
+    snprintf(buf, 255, "[GSM] Executing command '%s'...\t", c);
     uart_sendmsg(DBG_UART, buf, 255);
 #endif
     int retval = _gsm_exec(c, &retmsg, autoeol);
+    uart_clearbuf(GSM_UART);
 #ifdef DEBUG
     memset(&buf[0], '\0', 255);
     snprintf(buf, 255, "[%s]\r\n", retmsg);
@@ -143,8 +144,8 @@ void gsm_init() {
     // Initialize UART
     uart_init(GSM_UART);
 
-    uart_sendmsg(DBG_UART, "[GSM]: Initializing GSM modem..\r\n", -1);
-    uart_sendmsg(DBG_UART, "[GSM]: Activating hardware..\r\n", -1);
+    uart_sendmsg(DBG_UART, "[GSM] Initializing GSM modem..\r\n", -1);
+    uart_sendmsg(DBG_UART, "[GSM] Activating hardware..\r\n", -1);
 
     // Send escape to abort running tasks
     uart_putchar(GSM_UART, '\3');  // Ctrl-C
@@ -156,7 +157,7 @@ void gsm_init() {
     uart_clearbuf(GSM_UART);
 
     // Reset all modem settings
-    uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\r\n", -1);
+    uart_sendmsg(DBG_UART, "[GSM] Reset modem to factory defaults..\r\n", -1);
     gsm_exec("AT&F", true, true);
 
     // Enhanced return message format (<CR><LF>message<CR><LF>)
