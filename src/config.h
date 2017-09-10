@@ -14,13 +14,13 @@
 
 // Initial wait until alarm will be armed: 1 Minute
 #define INITIAL_WAIT 60000
-// Initial wait time for modem firmware to boot: 10 seconds
-#define INITIAL_MODEM_WAIT 10000
+// Initial wait time for modem firmware to boot: 5 seconds
+#define INITIAL_MODEM_WAIT 5000
 // Time to wait until notification is sent: Immediate
 #define ALARM_WAIT 0
-// Time to wait until resuming operation after alarm: 1 Minute
+// Time to wait until resuming operation after alarm: 15 Minutes
 // Won't resume operation if unset
-#define ALARM_RESUME 60000
+#define ALARM_RESUME 900000
 
 // Initialization message that will be sent as soon as
 // the system is armed. Comment it if no message should
