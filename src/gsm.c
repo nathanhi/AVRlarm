@@ -80,6 +80,13 @@ int _gsm_exec(char *c, char **retmsg, bool autoeol) {
         else if (strcmp(retval, TXT_CONNECT14400RLP) == 0 || strcmp(retval, "50") == 0)
             // Match for CODE/TXT CONNECT14400RLP
             return CODE_CONNECT14400RLP;
+        // AT+CPIN?
+        else if (strcmp(retval, "+CPIN: READY") == 0)
+            // Match for "READY" on CPIN requests
+            return CODE_OK;
+        else if (strcmp(retval, "+CPIN: SIM PIN") == 0 || strcmp(retval, "+CPIN: SIM PIN2") == 0||
+                 strcmp(retval, "+CPIN: SIM PUK") == 0 || strcmp(retval, "+CPIN: SIM PUK2") == 0)
+             return CODE_CPIN_REQUIRED;
     }
 }
 
@@ -172,55 +179,77 @@ void gsm_init() {
 
 #ifdef DEBUG
     // Enable extended error reporting
-    uart_sendmsg(DBG_UART, "[GSM]: Enable extended error codes...\r\n", -1);
+    uart_sendmsg(DBG_UART, "[GSM] Enable extended error codes...\r\n", -1);
     gsm_exec("AT+CMEE=2", true, true);
 #endif
 
-    // Enter PIN-Code if defined
+    // Enter PIN-Code if defined and required
+    if (gsm_exec("AT+CPIN?", false, true) != 0) {
 #ifdef PINCODE
-    uart_sendmsg(DBG_UART, "[GSM]: Unlocking SIM card..\r\n", -1);
-    gsm_exec(strcat("AT+CPIN=", PINCODE), false, true);
+        uart_sendmsg(DBG_UART, "[GSM] Unlocking SIM card..\r\n", -1);
+        gsm_exec(strcat("AT+CPIN=", PINCODE), true, true);
+#else
+        uart_sendmsg(DBG_UART, "[GSM] PIN or PUK required, but not configured!\r\n", -1);
+        while (true) {
+            // Loop endlessly and morse error message
+            // First part: Source module; GSM
+            morse(PORT_LED, "GSM");
+            _delay_ms(5*morse_dit_length);
+            morse(PORT_LED, "PIN");
+            _delay_ms(10*morse_dit_length);
+        }
 #endif
+    }
 
-    uart_sendmsg(DBG_UART, "[GSM]: Setting default character " \
+    uart_sendmsg(DBG_UART, "[GSM] Setting default character " \
                            "set to GSM..\r\n", -1);
     gsm_exec("AT+CSCS=\"GSM\"", true, true);
 }
 
-void _gsm_send_sms(char *msg, char *number) {
+bool _gsm_send_sms(char *msg, char *number) {
     /* Sends an SMS to the given number */
     // Set modem to text mode
     char buf[1024] = { '\0' };
     gsm_exec("AT+CMGF=1", true, true);
 
-    snprintf(buf, 1024, "[GSM]: Sending SMS with %i characters to '%s'.\r\n", strlen(msg), number);
+    snprintf(buf, 1024, "[GSM] Sending SMS with %i characters to '%s'.\r\n", strlen(msg), number);
     uart_sendmsg(DBG_UART, buf, 1024);
 
     // Switch to text mode for given number
     memset(&buf, '\0', 1024);
     snprintf(buf, 1024, "AT+CMGS=\"%s\"\r\n", number);
     uart_sendmsg(GSM_UART, buf, 1024);
+    _delay_ms(500);
     uart_clearbuf(GSM_UART);
 
     // Write message to buffer
     memset(&buf, '\0', 1024);
     snprintf(buf, 1024, "%s", msg);
+    _delay_ms(500);
     uart_sendmsg(GSM_UART, buf, 1024);
-    uart_clearbuf(GSM_UART);
 
-    // Send SMS
-    gsm_exec("\26", true, true);  // Ctrl-Z
-
-    // Clear buffer, just to make sure
-    uart_clearbuf(GSM_UART);
+    // Send message
+    return (gsm_exec("\032", false, true) == 0);
 }
 
 void gsm_send_sms(char *msg, char *numbers) {
     char *pt;
     pt = strtok(numbers, ",");
     while (pt != NULL) {
-        // Send SMS to every number specified
-        _gsm_send_sms(msg, pt);
+        // Try to send SMS to every number specified
+        if (!_gsm_send_sms(msg, pt)) {
+            uart_sendmsg(DBG_UART, "[GSM] Failed to send SMS! Trying again.\r\n", -1);
+            // Retry for configured amount on failure
+            for (int i=1; i<=SMS_RETRY_COUNT; i++) {
+                // Reinitialise modem
+                _delay_ms(1000);
+                gsm_init();
+                gsm_exec("AT+CHUP", false, true);  // Hang up existing calls
+
+                if (_gsm_send_sms(msg, pt))
+                    break;
+            }
+        }
         pt = strtok (NULL, ",");
     }
 }
