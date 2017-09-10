@@ -1,6 +1,6 @@
 CC = avr-gcc
 OBJCOPY = avr-objcopy
-CFLAGS += -std=c99 -O2 -Wall -Werror
+CFLAGS += -std=gnu99 -O2 -Wall -Werror
 
 BUILD_DEPS = src/uart.o \
              src/gsm.o \
