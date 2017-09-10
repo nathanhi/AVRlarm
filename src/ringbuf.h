@@ -12,4 +12,6 @@ typedef struct {
 void ringbuf_add_char(ringbuffer*, char);
 bool ringbuf_has_new_data(ringbuffer*);
 char ringbuf_read_char(ringbuffer*);
+char ringbuf_last_char(ringbuffer*);
+void ringbuf_reset(ringbuffer*);
 void ringbuf_init(ringbuffer*);

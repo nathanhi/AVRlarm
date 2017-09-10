@@ -85,7 +85,7 @@ void uart_clearbuf(int uart) {
     // Clears receive buffer of given UART
     *(uart_regs[uart].UDR);
 
-    ringbuf_init(&uart_rxbuf[uart]);
+    ringbuf_reset(&uart_rxbuf[uart]);
 }
 
 char uart_getchar(int uart) {
@@ -109,8 +109,10 @@ char *uart_getmsg(int uart) {
     int aritems = 0;
     int arsize = 0;
 
-    while (!ringbuf_has_new_data(&uart_rxbuf[uart])) {
-        // Wait for 1/4 the time of the buffer to fill
+    while ((!ringbuf_has_new_data(&uart_rxbuf[uart])) ||
+           ((ringbuf_last_char(&uart_rxbuf[uart]) != '\r') &&
+           (ringbuf_last_char(&uart_rxbuf[uart]) != '\n'))) {
+        // Wait until transmission is complete
         _delay_ms(((BAUD/1000)*RINGBUF_MAX_SIZE)/4);
     }
 

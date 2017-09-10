@@ -31,6 +31,16 @@ char ringbuf_read_char(ringbuffer *buf) {
     return buf->ringbuf[(buf->rpos++ % RINGBUF_MAX_SIZE)];
 }
 
+char ringbuf_last_char(ringbuffer *buf) {
+    // Retrieve last character from buffer
+    return buf->ringbuf[(buf->wpos-1 % RINGBUF_MAX_SIZE)];
+}
+
+void ringbuf_reset(ringbuffer *buf) {
+    buf->rpos = 0;
+    buf->wpos = 0;
+}
+
 void ringbuf_init(ringbuffer *buf) {
     // Initialise given buffer object
     buf->rpos = 0;
