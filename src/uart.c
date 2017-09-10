@@ -64,8 +64,8 @@ void uart_sendmsg(int uart, char *msg, int len) {
     if (uart == DBG_UART) {
         // Print timestamp first on DBG_UART
         char buf[255] = { '\0' };
-        double uptime = (double)timer_get_uptime()/(double)1000.00;
-        snprintf(buf, 255, "[%lf] ", uptime);
+        double uptime = timer_get_uptime();
+        snprintf(buf, 255, "[%lf] ", uptime/1000.00);
         for (int i = 0; i < strlen(buf); i++) {
             uart_putchar(uart, buf[i]);
         }

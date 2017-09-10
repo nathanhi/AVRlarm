@@ -1,17 +1,22 @@
 #include "timer.h"
 #include <avr/interrupt.h>
 #include <util/atomic.h>
+#include <stdint.h>
 
 #define CTC_MATCH_OVERFLOW ((F_CPU/1000UL)/8UL)
-volatile unsigned long timer1_ms;
+volatile uint64_t timer1_ms;
 
 ISR(TIMER1_COMPA_vect) {
     timer1_ms++;
+
+    // Reset on overflow to avoid random memory writes.
+    if (timer1_ms == UINT64_MAX)
+        asm("JMP 0");
 }
 
-unsigned long timer_get_uptime() {
+uint64_t timer_get_uptime() {
     /* Returns uptime since start of timer_init() */
-    unsigned long ms_return;
+    uint64_t ms_return;
 
     // Do not disrupt
     ATOMIC_BLOCK(ATOMIC_FORCEON) {
