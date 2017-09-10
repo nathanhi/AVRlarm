@@ -162,15 +162,10 @@ void uart_init_portstruct() {
 }
 
 void uart_buffer_rx(int uart) {
+    cli();
     char foo = *(uart_regs[uart].UDR);
     ringbuf_add_char(&uart_rxbuf[uart], foo);
-
-#ifdef DEBUG
-    char buf[128] = { '\0' };
-    snprintf(buf, 128, "=============\r\nrpos: %lu\r\nwpos:%lu\r\nchar:%c\r\n", uart_rxbuf[uart].rpos, uart_rxbuf[uart].wpos, foo);
-    uart_sendmsg(DBG_UART, buf, 128);
-    uart_sendmsg(DBG_UART, "=============\r\n", -1);
-#endif
+    sei();
 }
 
 ISR(USART0_RX_vect) {

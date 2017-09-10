@@ -31,6 +31,10 @@ int _gsm_exec(char *c, char **retmsg, bool autoeol) {
         *retmsg = uart_getmsg(GSM_UART);
         const char *retval = *retmsg;
 
+        if (retval[0] == '\0')
+            // Ignore empty strings
+            continue;
+
         // Parse output and return corresponding return code
         // We have to use magic numbers instead of the defines (CODE_...) here
         // because casting all these ints to proper strings would 
