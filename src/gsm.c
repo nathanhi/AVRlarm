@@ -135,19 +135,6 @@ int gsm_exec(char *c, bool abortonerror, bool autoeol) {
     return retval;
 }
 
-void gsm_toggle_igt() {
-    /* Set ignition to LOW for 100ms
-     * and HIGH for 1000ms to activate the modem
-     * as described in
-     * "3.3.1.1 Turn on GSM engine using the ignition line IGT (Power on)"
-     */
-    io_set_port_state(PORT_GSM_IGN, IO_PORT_LOW);
-    _delay_ms(100);  // From the manual, pull down for 100ms
-    io_set_port_state(PORT_GSM_IGN, IO_PORT_HIGH);
-    _delay_ms(100);  // From the manual, pull and pull up for 1000ms
-    io_set_port_state(PORT_GSM_IGN, IO_PORT_LOW);
-}
-
 void gsm_init() {
     /* Initialize Siemens TC35 GSM Unit */
     // Wait until modem firmware has finished booting
@@ -164,11 +151,9 @@ void gsm_init() {
     uart_putchar(GSM_UART, '\24'); // Ctrl-X
     uart_putchar(GSM_UART, '\27'); // Escape
 
-    // Send short pulse to GSM modem
-    gsm_toggle_igt();
-
-    // Enable echo
-    gsm_exec("ATE1", true, true);
+    // Disable echo
+    uart_sendmsg(GSM_UART, "ATE1\r\n", -1);
+    uart_clearbuf(GSM_UART);
 
     // Reset all modem settings
     uart_sendmsg(DBG_UART, "[GSM]: Reset modem to factory defaults..\r\n", -1);
