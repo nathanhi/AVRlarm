@@ -36,6 +36,9 @@
 #define TXT_CONNECT9600RLP "CONNECT 9600RLP"
 #define TXT_CONNECT14400RLP "CONNECT 14400RLP"
 
+// Internal codes
+#define CODE_CPIN_REQUIRED 1337
+
 void gsm_init();
 void gsm_powersave(bool);
 int gsm_exec(char*, bool, bool);

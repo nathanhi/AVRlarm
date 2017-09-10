@@ -34,6 +34,9 @@
 // uncomment the next line
 //#define PINCODE "1234"
 
+// Number of retries on SMS sending failure
+#define SMS_RETRY_COUNT 3
+
 // Target number for alarm notifications
 // Multiple numbers can be specified comma separated
 #define TGT_NUMS "+491,+4912,+49123,+491234,+4912345,+49123456,+491234567,+4912345678"
