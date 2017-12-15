@@ -1,6 +1,7 @@
 #include "uart.h"
 #include "timer.h"
 #include "ringbuf.h"
+#include "power.h"
 
 #include <float.h>
 #include <string.h>
@@ -16,6 +17,7 @@ typedef struct uart_registers {
     volatile uint8_t *UCSRB; /* RXC Interrupt + RX/TX Ports */
     volatile uint8_t *UCSRC; /* Parity + Stopbit */
     volatile uint8_t *UDR;   /* UART data register */
+    volatile uint8_t *PRR;   /* Power reduction register */
     int UCSZ0; /* Character size */
     int UCSZ1; /* Character size */
     int UCSZ2; /* Character size */
@@ -25,18 +27,13 @@ typedef struct uart_registers {
     int TXEN; /* TX enable bit */
     int RXC; /* RX complete bit */
     int TXC; /* TX complete bit */
+    int PRUSART; /* Power reduction bit */
+    bool configured;
 } uart_registers;
 
-typedef struct uart_ports {
-    bool uart1_initialized;
-    bool uart2_initialized;
-    bool uart3_initialized;
-    bool uart_regs_initialized;
-} uart_ports;
-
 uart_registers uart_regs[4];
-uart_ports uart_portstate = {false};
 ringbuffer uart_rxbuf[4];
+bool uart_power_configured = false;
 
 void string_append(char **str, char c, int *aritems, int *arsize) {
     /* Appends c to str1. */
@@ -51,8 +48,21 @@ void uart_putchar(int uart, char c) {
     /* Writes a character to UART,
      * automatic CRLF completion
      */
+    if (((*(uart_regs[uart].PRR) >> uart_regs[uart].PRUSART) & 0x01) == 1)
+        // Ignore transmissions if UART not yet configured after sleep
+        return;
+
+    // Make sure data register is empty
     loop_until_bit_is_set(*(uart_regs[uart].UCSRA), uart_regs[uart].UDRE);
+
+    // Write to transmit buffer
     *(uart_regs[uart].UDR) = c;
+
+    // Set transmit complete bit
+    *(uart_regs[uart].UCSRA) |= _BV(uart_regs[uart].TXC);
+
+    // Wait for completion
+    loop_until_bit_is_set(*(uart_regs[uart].UCSRA), uart_regs[uart].UDRE);
 }
 
 void uart_sendmsg(int uart, char *msg, int len) {
@@ -79,6 +89,9 @@ void uart_sendmsg(int uart, char *msg, int len) {
 
         uart_putchar(uart, msg[i]);
     }
+
+    // Wait for completion of message transfer
+    while (!(*(uart_regs[uart].UCSRA) & (1 << uart_regs[uart].TXC)));
 }
 
 void uart_clearbuf(int uart) {
@@ -154,15 +167,6 @@ char *uart_getmsg(int uart) {
     return msgbuf;
 }
 
-void uart_init_portstruct() {
-    // Initialise port structs
-    uart_regs[UART0] = *(uart_registers[]){{&UBRR0L, &UBRR0H, &UCSR0A, &UCSR0B, &UCSR0C, &UDR0, UCSZ00, UCSZ01, UCSZ02, UDRE0, RXCIE0, RXEN0, TXEN0, RXC0, TXC0}};
-    uart_regs[UART1] = *(uart_registers[]){{&UBRR1L, &UBRR1H, &UCSR1A, &UCSR1B, &UCSR1C, &UDR1, UCSZ10, UCSZ11, UCSZ12, UDRE1, RXCIE1, RXEN1, TXEN1, RXC1, TXC1}};
-    uart_regs[UART2] = *(uart_registers[]){{&UBRR2L, &UBRR2H, &UCSR2A, &UCSR2B, &UCSR2C, &UDR2, UCSZ20, UCSZ21, UCSZ22, UDRE2, RXCIE2, RXEN2, TXEN2, RXC2, TXC2}};
-    uart_regs[UART3] = *(uart_registers[]){{&UBRR3L, &UBRR3H, &UCSR3A, &UCSR3B, &UCSR3C, &UDR3, UCSZ30, UCSZ31, UCSZ32, UDRE3, RXCIE3, RXEN3, TXEN3, RXC3, TXC3}};
-    uart_portstate.uart_regs_initialized = true;
-}
-
 void uart_buffer_rx(int uart) {
     cli();
     char foo = *(uart_regs[uart].UDR);
@@ -190,18 +194,87 @@ ISR(USART3_RX_vect) {
     uart_buffer_rx(UART3);
 }
 
+powermgmt_callback uart_wakeup() {
+    // Powermanagement wakeup callback
+
+    // Iterate all previously defined UARTs and reinitialise them
+    for (int i=0; i<(sizeof(uart_regs)/sizeof(uart_regs[0])); i++) {
+        if (uart_regs[i].configured == false)
+            continue;
+
+        // Reset configuration state of port
+        uart_regs[i].configured = false;
+
+        // Re-initialise port
+        uart_init(i);
+    }
+
+#ifdef DEBUG
+    uart_sendmsg(DBG_UART, "[DBG] UART power management wakeup callback called!\r\n", -1);
+#endif
+}
+
+powermgmt_callback uart_sleep() {
+    // Powermanagement sleep preparation callback
+#ifdef DEBUG
+    uart_sendmsg(DBG_UART, "[DBG] UART power management sleep preparation callback called!\r\n", -1);
+#endif
+
+    // Iterate all previously configured UARTs and disable them
+    for (int i=0; i<(sizeof(uart_regs)/sizeof(uart_regs[0])); i++) {
+        if (uart_regs[i].configured == false)
+            continue;
+
+        *(uart_regs[i].PRR) |= _BV(uart_regs[i].PRUSART);
+    }
+}
+
+void uart_configure_powermgmt() {
+    // Configure power management if not already done
+    if (uart_power_configured) {
+        return;
+    }
+    uart_power_configured = true;
+
+    // Register callbacks
+    power_register_wakeup_callback(&uart_wakeup);
+    power_register_sleep_callback(&uart_sleep);
+}
+
+bool uart_init_portstruct(int uart) {
+    switch (uart) {
+        case UART0:
+            uart_regs[UART0] = *(uart_registers[]){{&UBRR0L, &UBRR0H, &UCSR0A, &UCSR0B, &UCSR0C, &UDR0, &PRR0, UCSZ00, UCSZ01, UCSZ02, UDRE0, RXCIE0, RXEN0, TXEN0, RXC0, TXC0, PRUSART0, false}};
+            break;
+        case UART1:
+            uart_regs[UART1] = *(uart_registers[]){{&UBRR1L, &UBRR1H, &UCSR1A, &UCSR1B, &UCSR1C, &UDR1, &PRR1, UCSZ10, UCSZ11, UCSZ12, UDRE1, RXCIE1, RXEN1, TXEN1, RXC1, TXC1, PRUSART1, false}};
+            break;
+        case UART2:
+            uart_regs[UART2] = *(uart_registers[]){{&UBRR2L, &UBRR2H, &UCSR2A, &UCSR2B, &UCSR2C, &UDR2, &PRR1, UCSZ20, UCSZ21, UCSZ22, UDRE2, RXCIE2, RXEN2, TXEN2, RXC2, TXC2, PRUSART2, false}};
+            break;
+        case UART3:
+            uart_regs[UART3] = *(uart_registers[]){{&UBRR3L, &UBRR3H, &UCSR3A, &UCSR3B, &UCSR3C, &UDR3, &PRR1, UCSZ30, UCSZ31, UCSZ32, UDRE3, RXCIE3, RXEN3, TXEN3, RXC3, TXC3, PRUSART3, false}};
+            break;
+        default:
+            return false;
+        }
+    return true;
+}
+
 void uart_init(int uart) {
-    /* Initializes UART with configured
+    /* Initialises UART with configured
      * baud rate and 8-N-1
      */
-    if (!uart_portstate.uart_regs_initialized) {
-        // Initialize port struct and receive ring buffer only once
-        uart_init_portstruct();
-
-        // Initialise ring buffer
+    if (uart_regs[uart].configured == false) {
+        // Initialise receive ring buffer && registers only once
+        uart_init_portstruct(uart);
         ringbuf_init(&uart_rxbuf[uart]);
     }
 
+    // Enable UART
+    *(uart_regs[uart].PRR) &= ~_BV(uart_regs[uart].PRUSART);
+
+    // Configure UART
     *(uart_regs[uart].UBRRL) = BAUDRATE&0xFF; /* Set bit rate to lower */
     *(uart_regs[uart].UBRRH) = (BAUDRATE>>8); /* and upper area */
     *(uart_regs[uart].UCSRA) &= ~(_BV(U2X0)); /* Disable 2X */
@@ -221,4 +294,10 @@ void uart_init(int uart) {
 
     // Enable interrupts
     sei();
+
+    // Configure power management
+    uart_configure_powermgmt();
+
+    // Store configuration state
+    uart_regs[uart].configured = true;
 }

@@ -8,6 +8,7 @@ BUILD_DEPS = src/uart.o \
              src/morse.o \
              src/timer.o \
              src/ringbuf.o \
+             src/power.o \
              src/main.o
 
 ifeq ($(filter debug,$(MAKECMDGOALS)),debug)
@@ -24,7 +25,7 @@ debug: all
 .INTERMEDIATE: src/version.h
 src/version.h:
 	echo "#define STEEP_BETA_COMMIT \"$(shell git rev-parse --short HEAD || echo unknown commit)\"" > $@
-	echo "#define STEEP_BETA_VERSION \"1.0.0\"" >> $@
+	echo "#define STEEP_BETA_VERSION \"1.1.0\"" >> $@
 	echo "#define STEEP_BETA_BUILDDATE \"$(shell date -I || echo unknown build date)\"" >> $@
 
 src/%$(DEBUGEXT).o: src/%.c src/version.h

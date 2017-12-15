@@ -8,10 +8,6 @@
 #define BAUD 9600
 #define BAUDRATE (((F_CPU)/(BAUD*16UL))-1)
 
-// Specifies the scan interval to check
-// for irregularities in milliseconds
-#define SCAN_INTERVAL 500
-
 // Initial wait until alarm will be armed: 1 Minute
 #define INITIAL_WAIT 60000
 // Initial wait time for modem firmware to boot: 5 seconds

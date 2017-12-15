@@ -3,8 +3,12 @@
 #include "gsm.h"
 #include "io.h"
 #include "timer.h"
+#include "power.h"
+
 #include <util/delay.h> // delay_ms
 #include <string.h> // memset
+#include <avr/interrupt.h> // sei
+#include <avr/wdt.h> // wdt_enable()
 
 #ifdef DEBUG
 void print_info() {
@@ -27,7 +31,7 @@ int freeMem() {
 }
 #endif
 
-int main (void) {
+int main() {
     // Initialise uptime timer
     timer_init();
 
@@ -48,65 +52,78 @@ int main (void) {
     // Initialize GSM Modem
     gsm_init();
 
-#ifdef INITIAL_WAIT
-    // Wait for specified initial wait time
-    _delay_ms(INITIAL_WAIT);
-#endif
+    // Set PORT_ALARM_INDICATOR as input
+    io_port_init(PORT_ALARM_INDICATOR, IO_PORT_IN, true);
+    
+    // Wait until PORT_ALARM_INDICATOR is LOW (i.e. doors closed)
+    while(io_get_port_state(PORT_ALARM_INDICATOR) != IO_PORT_LOW) {
+        _delay_ms(500);
+    }
 
-    // Send initialization SMS
+    // Send initialisation SMS
     uart_sendmsg(DBG_UART, "Sending initialisation SMS..\r\n", -1);
     gsm_send_sms(ARMMSG, INFO_NUMS);
+
+    // Power on status LED
+    io_set_port_state(PORT_LED, IO_PORT_HIGH);
+
+    // Enable interrupt for alarm indicator port, if pulled HIGH
+    PCMSK0 |= _BV(PORT_ALARM_INDICATOR);
+    PCICR |= _BV(PCIE0);
+    EICRA |= _BV(ISC01) | _BV(ISC00);
+    sei();
+
+    // Initialise power management
+    power_init();
 
     uart_sendmsg(DBG_UART, "[ALARM] Beginning alarm loop!\r\n", -1);
 
     while(1) {
-        // Power on status LED
-        io_set_port_state(PORT_LED, IO_PORT_HIGH);
+        // Enter sleep mode
+        power_sleep();
 
-#ifdef DEBUG
-        // Print debug output
-        print_info();
-#endif
-
-        // Pull alarm IO port to low
-        io_set_port_state(PORT_ALARM_INDICATOR, IO_PORT_LOW);
-
-        // Check for IO_PORT_LOW
-        // LOW == intrusion
-        if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_LOW) {
-            uart_sendmsg(DBG_UART, "[ALARM] Intrusion detected!\r\n", -1);
-            // Disable all LEDs to avoid detection
-            io_set_port_state(PORT_LED, IO_PORT_LOW);
-
-            // Wait for configured time
-            _delay_ms(ALARM_WAIT);
-
-            // Send SMS
-            gsm_send_sms(ALARMMSG, TGT_NUMS);
-
-#ifdef ALARM_RESUME
-            /* If alarm system is allowed to resume after
-             * an alarm, wait for specified time and continue
-             */
-            _delay_ms(ALARM_RESUME);
-#else
-            // If alarm system has to stay in error state, do so
-            while (1) {
-                io_set_port_state(PORT_LED, IO_PORT_LOW);
-                _delay_ms(100);
-                io_set_port_state(PORT_LED, IO_PORT_HIGH);
-                _delay_ms(100);
-            }
-#endif
-        }
-
-        // Wait first half of scan interval
-        _delay_ms(SCAN_INTERVAL/2);
-
-        // Disable LED
+        // Woke up by interrupt; Disable all LEDs to avoid detection
         io_set_port_state(PORT_LED, IO_PORT_LOW);
 
-        // Wait the other half
-        _delay_ms(SCAN_INTERVAL/2);
+        // Check port state after interrupt
+        if (io_get_port_state(PORT_ALARM_INDICATOR) == IO_PORT_LOW) {
+            // False alarm, enable LED and go to sleep again
+            io_set_port_state(PORT_LED, IO_PORT_HIGH);
+            continue;
+        }
+
+        // Port is HIGH, intrusion detected; wake up peripherals
+        power_wakeup();
+
+        // Print to console
+        uart_sendmsg(DBG_UART, "[ALARM] Intrusion detected!\r\n", -1);
+
+        // Wait for configured time
+        _delay_ms(ALARM_WAIT);
+
+        // Send SMS
+        gsm_send_sms(ALARMMSG, TGT_NUMS);
+
+#ifdef ALARM_RESUME
+        /* If alarm system is allowed to resume after
+         * an alarm, wait for specified time and continue
+         */
+        _delay_ms(ALARM_RESUME);
+        io_set_port_state(PORT_LED, IO_PORT_HIGH);
+#else
+        // If alarm system has to stay in error state, do so
+        while (1) {
+            io_set_port_state(PORT_LED, IO_PORT_LOW);
+            _delay_ms(100);
+            io_set_port_state(PORT_LED, IO_PORT_HIGH);
+            _delay_ms(100);
+        }
+#endif
     }
+
+    // Reset if while loop is somehow exited
+    wdt_enable(WDTO_15MS);
 }
+
+// Handle interrupt
+ISR(PCINT0_vect) { }
