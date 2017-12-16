@@ -15,7 +15,7 @@ addons:
     - avr-libc
   coverity_scan:
     project:
-      name: "nathanhi/steep-beta"
+      name: "nathanhi/AVRlarm"
       description: "Build submitted via Travis CI"
     notification_email: nathanhi@deepserve.info
     build_command_prepend: "make clean && cov-configure --comptype gcc --compiler avr-gcc -- -mmcu=atmega2560 -std=gnu99"
