@@ -18,6 +18,6 @@ addons:
       name: "nathanhi/steep-beta"
       description: "Build submitted via Travis CI"
     notification_email: nathanhi@deepserve.info
-    build_command_prepend: "make clean && cov-configure --comptype gcc --compiler avr-gcc -- -mmcu=atmega2560"
+    build_command_prepend: "make clean && cov-configure --comptype gcc --compiler avr-gcc -- -mmcu=atmega2560 -std=gnu99"
     build_command: "make all"
     branch_pattern: master
